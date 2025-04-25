@@ -1,0 +1,106 @@
+.user-management {
+    margin-top: 20px;
+}
+
+.user-management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-section {
+    flex: 1;
+    max-width: 300px;
+}
+
+.search-input {
+    width: 100%;
+}
+
+.search-icon {
+    color: #666;
+    margin-right: 8px;
+}
+
+.add-user-button {
+    background-color: #357070 !important;
+    text-transform: none !important;
+    padding: 8px 16px !important;
+}
+
+.users-table-container {
+    box-shadow: -1px 4px 14px -1px rgba(0, 0, 0, 0.23) !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.MuiTableHead-root .MuiTableCell-root {
+    background-color: #fff;
+    font-weight: 600;
+    color: #333;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-info .MuiAvatar-root {
+    width: 36px;
+    height: 36px;
+}
+
+.user-info .MuiTypography-root {
+    font-weight: 500;
+}
+
+.MuiChip-root {
+    font-weight: 500 !important;
+}
+
+.MuiChip-outlinedPrimary {
+    color: #357070 !important;
+    border-color: #357070 !important;
+}
+
+.menu-icon {
+    margin-right: 8px;
+}
+
+.delete-menu-item {
+    color: #cc6565;
+}
+
+.delete-menu-item .menu-icon {
+    color: #cc6565;
+}
+
+/* Table row hover effect */
+.MuiTableBody-root .MuiTableRow-root:hover {
+    background-color: #f8f9fa;
+}
+
+/* Pagination styles */
+.MuiTablePagination-root {
+    border-top: 1px solid #eee;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-management {
+        margin-top: 16px;
+    }
+
+    .user-management-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .search-section {
+        max-width: none;
+    }
+} 

@@ -1,0 +1,71 @@
+.featured{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.featuredItem{
+    flex: 1;
+    padding: 30px;
+    border-radius: 10px;
+    color: white;
+    background-color: white;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    min-width: 250px;
+}
+.featuredItem.revenue {
+    background-color: #0D623F;
+}
+.featuredItem.sales {
+    background-color: #FA5046;
+}
+.featuredItem.cost {
+    background-color: #204B98;
+}
+.featuredItem:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.featuredTitle{
+    font-size: 20px;
+    color: inherit;
+    font-weight: 600;
+}
+.featuredMoneyContainer{
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+}
+.featureMoney{
+    font-size: 30px;
+    font-weight: 600;
+    color: inherit;
+}
+.featureMoneyRate{
+    display: flex;
+    font-weight: 600;
+    align-items: center;
+    margin-left: 20px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: inherit;
+}
+.featuredName{
+    margin-left: 10px;
+    color: #FFFFFF;
+    font-size: 13px !important;
+    font-weight: 500;
+}
+.featuredName.negative{
+    color: #FFE5E5;
+    margin-left: 10px;
+    font-size: 13px;
+}
+.featureSub{
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 15px;
+    margin-top: 5px;
+}

@@ -1,0 +1,78 @@
+.widgetLg {
+  flex: 2;
+  padding: 20px;
+  box-shadow: 0 0 15px -10px rgba(0, 0, 0, 0.75);
+  background-color: white;
+  border-radius: 10px;
+}
+
+.widgetLgTitle {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.widgetLgtable {
+  width: 100%;
+  border-spacing: 20px;
+}
+
+.widgetLgth {
+  text-align: left;
+  color: #666;
+  font-weight: 600;
+}
+
+.widgetLgUser {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.widgetLguserimg {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+.widgetLgdate {
+  color: #666;
+}
+
+.widgetLgStatus {
+  display: flex;
+  align-items: center;
+}
+
+.widgetLgbutton {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.widgetLgbutton.Checked {
+  background-color: #e5faf2;
+  color: #3bb077;
+}
+
+.widgetLgbutton.Declined {
+  background-color: #fff0f1;
+  color: #d95087;
+}
+
+.widgetLgbutton.Pending {
+  background-color: #ebf1fe;
+  color: #2a7ade;
+}
+
+.status-icon {
+  font-size: 16px !important;
+  margin-right: 5px;
+}

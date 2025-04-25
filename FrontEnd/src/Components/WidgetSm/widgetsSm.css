@@ -1,0 +1,63 @@
+.widgetSm{
+    flex: 1;
+    padding: 20px;
+    box-shadow: 0 0 15px -10px rgba(0, 0, 0, 0.75);
+    background-color: white;
+    border-radius: 10px;
+}
+.widgetSmTitle{
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+}
+.widgetSmList{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.widgetSmImg{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.widgetSmItem{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+.widgetSmbutton{
+    display: flex;
+    align-items: center;
+    border: none;
+    border-radius: 10px;
+    padding:7px 10px;
+    background-color: #eeeef7;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.widgetSmbutton:hover{
+    background-color: #e0e0e0;
+}
+.widgetsmIcon{
+    font-size: 16px !important;
+    margin-right: 5px;
+}
+.widgetSmUser{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-left: 15px;
+}
+.widgetSmUsername{
+    font-weight: 600;
+    color: #333;
+}
+.widgetSmJobcatagory{
+    font-weight: 300;
+    color: #666;
+    font-size: 14px;
+}

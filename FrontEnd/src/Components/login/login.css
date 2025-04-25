@@ -1,0 +1,111 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    position: relative;
+    background-color: white;
+    padding: 20px;
+}
+
+.login-container::before {
+    content: '';
+    position: absolute;
+    right: 250px;
+    bottom: 150px;
+    width: 70%;
+    height: 70%;
+    background-image: url('../../Assets/images/red.png');
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    background-size: contain;
+    opacity: 0.3;
+    filter: brightness(0) saturate(100%) invert(31%) sepia(93%) saturate(431%) hue-rotate(146deg) brightness(93%) contrast(103%);
+}
+
+.login-content {
+    width: 100%;
+    max-width: 400px;
+    background: linear-gradient(135deg, #006A71 0%, rgb(62, 88, 113) 100%);;
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.welcome-text {
+    font-size: 32px !important;
+    font-weight: 800 !important;
+    color: #ffffff;
+    margin-bottom: 16px !important;
+    text-align: left;
+}
+
+.welcome-subtitle {
+    color: #F2EFE7;
+    margin-bottom: 32px !important;
+    text-align: left;
+    font-size: 14px !important;
+}
+
+.social-buttons {
+    display: none; /* Hiding social buttons as they're not in the screenshot */
+}
+
+.or-text {
+    color: #666;
+    margin: 16px 0 !important;
+    font-size: 14px !important;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.MuiTextField-root {
+    background-color: #f8f9fa !important;
+    border-radius: 4px !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root {
+    border-radius: 4px;
+}
+
+.MuiTextField-root .MuiOutlinedInput-input {
+    padding: 14px;
+}
+
+.submit-btn {
+    background-color: #9ACBD0 !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    border-radius: 4px !important;
+    margin-top: 16px !important;
+}
+
+.submit-btn:hover {
+    background-color: #1565c0 !important;
+}
+
+/* Hide the left panel as it's not in the screenshot */
+.left-panel {
+    display: none;
+}
+
+/* Adjust right panel to take full width */
+    .right-panel {
+    width: 100%;
+    }
+
+    .create-account-text {
+    font-size: 32px !important;
+    font-weight: 600 !important;
+    color: #333;
+    margin-bottom: 24px !important;
+    text-align: left;
+}
