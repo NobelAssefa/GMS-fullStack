@@ -19,6 +19,20 @@ const createCar = AsyncHandler(async (req, res) => {
     res.status(201).json(car)
 
 });
+
+const getCarByGuest = AsyncHandler(async (req, res) => {
+    const { guestId } = req.params;
+  
+    const car = await Car.findOne({ guest_id: guestId });
+  
+    if (!car) {
+      res.status(404);
+      throw new Error('Car not found');
+    }
+  
+    res.status(200).json(car);
+  });
+
 const getCar = AsyncHandler (async (req,res)=>{
     const car = await Car.find()
     res.status(200).json(car)
@@ -62,5 +76,5 @@ const deleteCar = AsyncHandler(async (req,res)=>{
 })
 
 module.exports = {
-    createCar,getCar,getSingleCar,updateCar,deleteCar
+    createCar,getCar,getSingleCar,updateCar,deleteCar,getCarByGuest
 }

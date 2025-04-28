@@ -27,6 +27,16 @@ const authMiddleware = AsyncHandler(
     }
 );
 
+
+const authorize = (...roles) => {
+    return (req, res, next) => {
+      if (!roles.includes(req.user.role)) {
+        res.status(403);
+        throw new Error(`User role '${req.user.role}' is not authorized to access this route`);
+      }
+      next();
+    };
+  };
 const is_Admin = AsyncHandler(async (req, res, next) => {
     const user = await User.findById(req.user._id).populate("-password")
     if (!user) {
@@ -45,4 +55,4 @@ const is_Admin = AsyncHandler(async (req, res, next) => {
 
 
 
-module.exports = {authMiddleware,is_Admin};
+module.exports = {authMiddleware,is_Admin,authorize};
