@@ -8,6 +8,13 @@ const itemSchema = mongoose.Schema({
     visit_id:{
         type:mongoose.Schema.Types.ObjectId,ref:"Visit"
     },
+    serial_number:{
+        type: String,
+        required:[true, "Please provide item serial_number"],
+        unique: true,
+        trim: true,
+       
+    },
     quantity:{
         type:Number,
         required:true

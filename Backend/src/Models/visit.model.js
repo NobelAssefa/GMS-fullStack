@@ -25,6 +25,7 @@ const visitSchema = mongoose.Schema({
     timestamps:true
 });
 
+
 module.exports = mongoose.model("Visit", visitSchema);
 
 
