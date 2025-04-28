@@ -5,8 +5,8 @@ const {authMiddleware,is_Admin} = require('../Middlewares/authMiddleware');
 
 
 router.use(authMiddleware)
-router.get('/getuserbyid/:id', is_Admin,getUserById);
-router.put('/update/:id', is_Admin,updateProfile)
-router.post('/delete/:id', is_Admin,deleteUser)
+router.get('/getuserbyid/:id',getUserById);
+router.put('/update/:id',updateProfile)
+router.put('/delete/:id',deleteUser)
 
 module.exports=router;

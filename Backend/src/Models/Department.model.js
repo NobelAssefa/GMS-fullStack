@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const departmentSchema = mongoose.Schema({
-    department_name:{
+    departmentName:{
         type:String,
         required:true
     }

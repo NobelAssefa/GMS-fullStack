@@ -27,9 +27,8 @@ const registerUser = AsyncHandler(
             res.status(400);
             throw new Error("email is already registerd!")
         }
-        const hashedPassword = await bcrypt.hash(password, 10)
         const user = await User.create({
-            fullName, email, password: hashedPassword, phone, status, role_id, department_id
+            fullName, email, password, phone, status, role_id, department_id
         })
 
 
@@ -72,12 +71,17 @@ const login = AsyncHandler(
 
         // check if a user exists
         const user = await User.findOne({ email })
+        console.log(user)
 
         if (!user) {
             res.status(400);
             throw new Error('user not found, please signup')
         }
-        const passwordExists = await bcrypt.compare(password, user.password)
+        
+        const passwordExists = await bcrypt.compare(password,user.password)
+
+        console.log("sent password",password)
+        console.log("stored password",user.password)
         if (!passwordExists) {
             res.status(401);
             throw new Error('Invalid email or password')
@@ -99,8 +103,8 @@ const login = AsyncHandler(
         // check if email and password is correct
 
         if (user && passwordExists) {
-            const { _id, fullName, email, phone, status, token } = user
-            res.status(201).json({
+            const { _id, fullName, email, phone, status } = user
+            res.status(200).json({
                 _id, fullName, email, phone, status, token
             })
         }
