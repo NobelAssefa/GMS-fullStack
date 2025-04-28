@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Provider } from 'react-redux';
 import Topbar from "./Components/topbar/Topbar";
 import Sidebar from './Components/sidebar/Sidebar';
 import "./app.css";
@@ -13,6 +14,8 @@ import CheckInPanelPage from './Pages/CheckInPanel/CheckInPanelPage';
 import UserManagementPage from './Pages/UserManagement/UserManagementPage';
 import LoginPage from './Pages/Login/LoginPage';
 import NewUser from './Components/userManagement/NewUser';
+import ProtectedRoute from './Components/ProtectedRoute';
+import store from './Redux/store';
 
 // Layout component to wrap pages that need sidebar and topbar
 const Layout = ({ children }) => {
@@ -53,29 +56,68 @@ const PageWrapper = ({ children }) => {
 
 function App() {
   return (
-    <Router>
-      <PageWrapper>
-        <Routes>
-          {/* Redirect root to home after login */}
-          <Route path="/" element={<Home />} />
-          
-          {/* Login Route */}
-          <Route path="/login" element={<LoginPage />} />
-          
-          {/* Main Routes */}
-          <Route path="/home" element={<Home />} />
-          <Route path="/user" element={<UserManagementPage />} />
-          <Route path="/users/new" element={<NewUser />} />
-          <Route path="/guest/registration" element={<GuestRegistrationPage />} />
-          <Route path="/visit/request" element={<VisitRequestPage />} />
-          <Route path="/visit/approval" element={<VisitApprovalPage />} />
-          <Route path="/checkin" element={<CheckInPanelPage />} />
-          
-          {/* Catch all - 404 */}
-          <Route path="*" element={<Navigate to="/home" replace />} />
-        </Routes>
-      </PageWrapper>
-    </Router>
+    <Provider store={store}>
+      <Router>
+        <PageWrapper>
+          <Routes>
+            {/* Login Route - Public */}
+            <Route path="/login" element={<LoginPage />} />
+            
+            {/* Protected Routes */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/home" element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/user" element={
+              <ProtectedRoute>
+                <UserManagementPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/users/new" element={
+              <ProtectedRoute>
+                <NewUser />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/guest/registration" element={
+              <ProtectedRoute>
+                <GuestRegistrationPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/visit/request" element={
+              <ProtectedRoute>
+                <VisitRequestPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/visit/approval" element={
+              <ProtectedRoute>
+                <VisitApprovalPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/checkin" element={
+              <ProtectedRoute>
+                <CheckInPanelPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Catch all - 404 */}
+            <Route path="*" element={<Navigate to="/home" replace />} />
+          </Routes>
+        </PageWrapper>
+      </Router>
+    </Provider>
   );
 }
 

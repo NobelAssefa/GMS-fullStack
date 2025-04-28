@@ -21,7 +21,12 @@ connectDB();
 
 
 // MIDDLEWARES
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'], // Allow both Vite and React development servers
+    credentials: true, // Allow cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))
 
 app.use(express.json());
 app.use(cookieParser())
