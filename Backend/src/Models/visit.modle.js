@@ -1,13 +1,13 @@
 const mongoose = require('mongoose')
 
 const visitSchema = mongoose.Schema({
-    guest:{
+    guest_id:{
         type:mongoose.Schema.Types.ObjectId,ref:"Guest"
     },
-    user:{
+    user_id:{
         type:mongoose.Schema.Types.ObjectId,ref:"User"
     },
-    department:{
+    department_id:{
         type:mongoose.Schema.Types.ObjectId,ref:"Department"
     },
     visit_date:Date,

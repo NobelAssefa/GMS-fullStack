@@ -8,6 +8,8 @@ const authRoutes = require('./src/Routes/auth.routes')
 const userRoutes = require('./src/Routes/user.routes')
 const userRole = require('./src/Routes/role.routes')
 const department = require('./src/Routes/department.routes')
+const guest = require('./src/Routes/guest.routes')
+const car = require('./src/Routes/car.routes')
 const errorHandler = require('./src/Middlewares/errorHandler')
 const cookieParser = require('cookie-parser')
 
@@ -30,6 +32,9 @@ app.use("/api/auth", authRoutes)
 app.use("/api/user", userRoutes)
 app.use("/api/role", userRole)
 app.use("/api/department", department)
+app.use("/api/guest", guest)
+app.use("/api/car", car)
+
 
 
 app.use(errorHandler)

@@ -10,7 +10,7 @@ router.post('/createdepartment',createDepartment)
 router.get('/getdepartments',getDepartment)
 router.get('/getsingledepartment/:id',getSingleDepartment);
 router.put('/updatedepartment/:id',updateDepartment)
-router.put('deletedepartment/:id',deleteDepartment)
+router.put('/deletedepartment/:id',deleteDepartment)
 
 
 module.exports = router;

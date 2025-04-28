@@ -22,7 +22,11 @@ const getUserById = AsyncHandler(
         }
 
     });
+const getUsers = AsyncHandler(async (req,res)=>{
+    const users = await User.find();
+    res.status(200).json(users);
 
+})
     
 const updateProfile = AsyncHandler(async (req, res) => {
     const { fullName, phone, role_id, department_id, status } = req.body;
@@ -38,7 +42,6 @@ const updateProfile = AsyncHandler(async (req, res) => {
     user.role_id = role_id || user.role_id;
     user.department_id = department_id || user.department_id;
     user.status = status !== undefined ? status : user.status;
-
     const updatedUser = await user.save();
     console.log("Updated user", updatedUser);
     
@@ -59,6 +62,7 @@ const deleteUser = AsyncHandler(async (req,res)=>{
 
 module.exports = {
     getUserById,
+    getUsers,
     updateProfile,
     deleteUser
 

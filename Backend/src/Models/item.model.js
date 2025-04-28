@@ -5,7 +5,7 @@ const itemSchema = mongoose.Schema({
         type:String,
         required:true
     },
-    visit:{
+    visit_id:{
         type:mongoose.Schema.Types.ObjectId,ref:"Visit"
     },
     quantity:{

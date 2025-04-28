@@ -51,7 +51,7 @@ const deleteDepartment = AsyncHandler(async (req,res)=>{
         throw new Error('no departmet exists!');
     }
     await department.deleteOne();
-    res.status(200).json({ message: 'Role deleted successfully' });
+    res.status(200).json({ message: 'Department deleted successfully' });
 })
 
 module.exports = {

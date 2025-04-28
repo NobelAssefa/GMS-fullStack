@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const carSchema = mongoose.Schema({
-    guest:{
+    guest_id:{
         type:mongoose.Schema.Types.ObjectId,ref:"Guest"
     },
     plate_number:{
