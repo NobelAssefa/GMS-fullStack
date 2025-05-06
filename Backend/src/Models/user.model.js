@@ -37,6 +37,10 @@ const userSchema = mongoose.Schema({
     department:{
         type:mongoose.Schema.Types.ObjectId,ref:"Department"
     },
+    is_Admin:{
+        type:Boolean,
+        default:false
+    },
     createdAt:{
         type:Date,
         default:Date.now

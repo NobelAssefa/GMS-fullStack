@@ -169,7 +169,7 @@ export default function Department() {
                             ) : (
                                 filteredDepartments.map((department) => (
                                     <TableRow key={department.id} hover>
-                                        <TableCell>{department.name}</TableCell>
+                                        <TableCell>{department.departmentName}</TableCell>
                                         <TableCell>{department.description}</TableCell>
                                         <TableCell align="right">
                                             <IconButton

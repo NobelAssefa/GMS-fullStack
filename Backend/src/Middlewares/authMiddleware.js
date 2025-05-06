@@ -10,19 +10,19 @@ const authMiddleware = AsyncHandler(
             if (!token) {
                 console.log('No token found in cookies'); // Debug: Log when no token
                 res.status(401);
-                throw new Error("You're not authorized")
+                throw new Error("Not authorized, no token")
             }
 
             console.log('Token found:', token); // Debug: Log the token
             //verify token
-            const verified = jwt.verify(token, process.env.JWT_SECRET_KEY)
-            console.log('Token verified:', verified); // Debug: Log verification result
+            const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+            console.log('Token verified:', decoded); // Debug: Log verification result
             
-            req.user = await User.findById(verified.id).select("-password")
+            req.user = await User.findById(decoded.id).select("-password")
             if (!req.user) {
-                console.log('User not found for ID:', verified.id); // Debug: Log when user not found
+                console.log('User not found for ID:', decoded.id); // Debug: Log when user not found
                 res.status(401)
-                throw new Error("User Not Found")
+                throw new Error("Not authorized, user not found")
             }
 
             console.log('User authenticated:', req.user._id); // Debug: Log successful auth
@@ -30,11 +30,10 @@ const authMiddleware = AsyncHandler(
         } catch (error) {
             console.error('Auth error:', error.message); // Debug: Log any errors
             res.status(401)
-            throw new Error("Not authenticated, please login !!")
+            throw new Error("Not authorized, please login")
         }
     }
 );
-
 
 const authorize = (...roles) => {
     return (req, res, next) => {
@@ -45,22 +44,26 @@ const authorize = (...roles) => {
       next();
     };
   };
+
 const is_Admin = AsyncHandler(async (req, res, next) => {
-    const user = await User.findById(req.user._id).populate("-password")
-    if (!user) {
-        res.status(401)
-        throw new Error("User Not Found")
-    }
-    if(user.role_id.role_name === "Admin"){
-        next
-    }
-    else{
+    console.log("Entered is_Admin function");
+    
+    try {
+        if (!req.user) {
+            res.status(401);
+            throw new Error('Not authorized, please login');
+        }
+
+        if (!req.user.is_Admin) {
+            res.status(403);
+            throw new Error('Not authorized as admin');
+        }
+
+        next();
+    } catch (error) {
         res.status(401);
-        throw new Error("Access Denied: Admins only")
+        throw new Error('Not authorized, please login');
     }
-})
+});
 
-
-
-
-module.exports = {authMiddleware,is_Admin,authorize};
+module.exports = {authMiddleware, is_Admin, authorize};

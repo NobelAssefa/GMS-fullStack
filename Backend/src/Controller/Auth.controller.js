@@ -6,10 +6,11 @@ const crypto = require('crypto')
 const Token = require('../Models/token.model')
 const sendEmail = require('../Utils/sendEmail')
 const generateToken = require("../Utils/generateToken")
+const { is_Admin } = require('../Middlewares/authMiddleware')
 //USER REGISTRATION
 const registerUser = AsyncHandler(
     async (req, res) => {
-        const { fullName, email, password, phone, status, role_id, department_id } = req.body;
+        const { fullName, email, password, phone, status, role_id, department_id,is_Admin } = req.body;
 
         if (!fullName || !email || !password) {
             res.status(400);
@@ -28,7 +29,7 @@ const registerUser = AsyncHandler(
             throw new Error("email is already registerd!")
         }
         const user = await User.create({
-            fullName, email, password, phone, status, role_id, department_id
+            fullName, email, password, phone, status, role_id, department_id,is_Admin
         })
 
 
@@ -46,9 +47,9 @@ const registerUser = AsyncHandler(
         })
 
         if (user) {
-            const { _id, fullName, email, phone, status, token } = user
+            const { _id, fullName, email, phone, status,is_Admin,role_id,token } = user
             res.status(201).json({
-                _id, fullName, email, phone, status, token
+                _id, fullName, email, phone, status, token,is_Admin,role_id
             })
         } else {
             res.status(400);
@@ -100,10 +101,10 @@ const login = AsyncHandler(
         console.log('Cookie set with token'); // Debug: Log cookie setting
 
         if (user && passwordExists) {
-            const { _id, fullName, email, phone, status } = user
+            const { _id, fullName, email, phone, status,role_id,is_Admin } = user
             console.log('Login successful for:', email); // Debug: Log successful login
             res.status(200).json({
-                _id, fullName, email, phone, status, token
+                _id, fullName, email, phone, status, role_id,token,is_Admin,
             })
         }
         else {
