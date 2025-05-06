@@ -1,16 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import "./topbar.css"
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import LanguageIcon from '@mui/icons-material/Language';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PersonIcon from '@mui/icons-material/Person';
 import logo from '../../Assets/icons/Untitled.svg';
+import { authService } from '../../Services/api';
+import { logout } from '../../Redux/slices/authSlice';
 
 export default function Topbar() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { user } = useSelector((state) => state.auth);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      dispatch(logout());
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   useEffect(() => {
@@ -54,16 +73,25 @@ export default function Topbar() {
          
              <div className="avatar-container" ref={dropdownRef}>
                  <img 
-                     src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=400" 
-                     alt="" 
+                     src={user?.img || "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=400"} 
+                     alt={user?.fullName || "User"} 
                      className="avatar" 
                      onClick={toggleDropdown}
                  />
                  {isDropdownOpen && (
                      <div className="dropdown-menu">
-                         <div className="dropdown-item">Profile</div>
-                         <div className="dropdown-item">Settings</div>
-                         <div className="dropdown-item">Logout</div>
+                         <div className="dropdown-item">
+                            
+                             Profile
+                         </div>
+                         <div className="dropdown-item">
+                           
+                             Settings
+                         </div>
+                         <div className="dropdown-item" onClick={handleLogout}>
+                            
+                             Logout
+                         </div>
                      </div>
                  )}
              </div>

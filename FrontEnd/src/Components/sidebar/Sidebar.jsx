@@ -91,7 +91,7 @@ export default function Sidebar({ isCollapsed }) {
             <Link to="/department" className="link" onClick={() => handleItemClick("/department")}>
               <li className={`sidebarListItem ${activeItem === "/department" ? "active" : ""}`}>
                 <BusinessIcon className="sideBarIcons" />
-                Department Management  	 
+                Department Mgmt.  	 
               </li>
             </Link>
           </ul>
