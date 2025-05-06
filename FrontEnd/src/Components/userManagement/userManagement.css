@@ -29,6 +29,22 @@
     padding: 8px 16px !important;
 }
 
+.add-role-button {
+    text-transform: none !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    border: 1.5px solid #357070 !important;
+    color: #357070 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+.add-role-button:hover {
+    background: #f0f4f7 !important;
+    border-color: #357070 !important;
+}
+
 .users-table-container {
     box-shadow: -1px 4px 14px -1px rgba(0, 0, 0, 0.23) !important;
     border-radius: 8px !important;

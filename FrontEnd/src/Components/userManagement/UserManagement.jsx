@@ -107,6 +107,10 @@ export default function UserManagement() {
         navigate('/users/new');
     };
 
+    const handleAddRole = () => {
+        navigate('/roles/new');
+    };
+
     const filteredUsers = users.filter(user =>
         user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -129,15 +133,25 @@ export default function UserManagement() {
                         className="search-input"
                     />
                 </div>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    className="add-user-button"
-                    onClick={handleAddNewUser}
-                >
-                    Add New User
-                </Button>
+                <div style={{ display: 'flex', gap: 12 }}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon />}
+                        className="add-user-button"
+                        onClick={handleAddNewUser}
+                    >
+                        Add New User
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        className="add-role-button"
+                        onClick={handleAddRole}
+                    >
+                        Add Role
+                    </Button>
+                </div>
             </div>
 
             <Paper className="users-table-container">

@@ -1,0 +1,87 @@
+.new-role-container {
+    margin-top: 20px;
+    margin-left: 24px;
+}
+
+.new-role-header-card {
+    background: linear-gradient(90deg, #238a8d 0%, #329c9e 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 32px 36px 24px 36px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.new-role-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+.new-role-subtitle {
+    font-size: 1.2rem;
+    color: #e0f7fa;
+    font-weight: 400;
+}
+
+.form-container {
+    background-color: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-field {
+    margin-bottom: 20px;
+}
+
+.form-field .MuiOutlinedInput-root {
+    border-radius: 8px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.cancel-button {
+    color: #666 !important;
+    border-color: #666 !important;
+    text-transform: none !important;
+    padding: 8px 24px !important;
+    border-radius: 8px !important;
+}
+
+.submit-button {
+    background-color: #238a8d !important;
+    text-transform: none !important;
+    padding: 8px 24px !important;
+    border-radius: 8px !important;
+}
+
+@media (max-width: 768px) {
+    .new-role-header-card {
+        padding: 20px 10px 16px 10px;
+    }
+    .new-role-title {
+        font-size: 2rem;
+    }
+    .form-container {
+        padding: 20px;
+    }
+    .form-actions {
+        flex-direction: column;
+    }
+    .cancel-button,
+    .submit-button {
+        width: 100%;
+    }
+} 

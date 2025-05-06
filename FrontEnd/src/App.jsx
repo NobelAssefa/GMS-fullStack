@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/es/integration/react';
+import { store, persistor } from './Redux/store';
 import Topbar from "./Components/topbar/Topbar";
 import Sidebar from './Components/sidebar/Sidebar';
 import "./app.css";
@@ -15,7 +17,10 @@ import UserManagementPage from './Pages/UserManagement/UserManagementPage';
 import LoginPage from './Pages/Login/LoginPage';
 import NewUser from './Components/userManagement/NewUser';
 import ProtectedRoute from './Components/ProtectedRoute';
-import store from './Redux/store';
+import AuthProvider from './Components/AuthProvider';
+import DepartmentPage from './Pages/Department/DepartmentPage';
+import NewDepartmentPage from './Pages/Department/NewDepartmentPage';
+import NewRolePage from './Pages/Role/NewRolePage';
 
 // Layout component to wrap pages that need sidebar and topbar
 const Layout = ({ children }) => {
@@ -57,66 +62,88 @@ const PageWrapper = ({ children }) => {
 function App() {
   return (
     <Provider store={store}>
-      <Router>
-        <PageWrapper>
-          <Routes>
-            {/* Login Route - Public */}
-            <Route path="/login" element={<LoginPage />} />
-            
-            {/* Protected Routes */}
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/home" element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/user" element={
-              <ProtectedRoute>
-                <UserManagementPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/users/new" element={
-              <ProtectedRoute>
-                <NewUser />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/guest/registration" element={
-              <ProtectedRoute>
-                <GuestRegistrationPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/visit/request" element={
-              <ProtectedRoute>
-                <VisitRequestPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/visit/approval" element={
-              <ProtectedRoute>
-                <VisitApprovalPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/checkin" element={
-              <ProtectedRoute>
-                <CheckInPanelPage />
-              </ProtectedRoute>
-            } />
-            
-            {/* Catch all - 404 */}
-            <Route path="*" element={<Navigate to="/home" replace />} />
-          </Routes>
-        </PageWrapper>
-      </Router>
+      <PersistGate loading={null} persistor={persistor}>
+        <Router>
+          <AuthProvider>
+            <PageWrapper>
+              <Routes>
+                {/* Login Route - Public */}
+                <Route path="/login" element={<LoginPage />} />
+                
+                {/* Protected Routes */}
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/home" element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/user" element={
+                  <ProtectedRoute>
+                    <UserManagementPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/users/new" element={
+                  <ProtectedRoute>
+                    <NewUser />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/guest/registration" element={
+                  <ProtectedRoute>
+                    <GuestRegistrationPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/visit/request" element={
+                  <ProtectedRoute>
+                    <VisitRequestPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/visit/approval" element={
+                  <ProtectedRoute>
+                    <VisitApprovalPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/checkin" element={
+                  <ProtectedRoute>
+                    <CheckInPanelPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/department" element={
+                  <ProtectedRoute>
+                    <DepartmentPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/department/new" element={
+                  <ProtectedRoute>
+                    <NewDepartmentPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/roles/new" element={
+                  <ProtectedRoute>
+                    <NewRolePage />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Catch all - 404 */}
+                <Route path="*" element={<Navigate to="/home" replace />} />
+              </Routes>
+            </PageWrapper>
+          </AuthProvider>
+        </Router>
+      </PersistGate>
     </Provider>
   );
 }

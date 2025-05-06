@@ -41,6 +41,10 @@ export const authService = {
         const response = await api.post('/auth/register', userData);
         return response.data;
     },
+    checkAuth: async () => {
+        const response = await api.get('/auth/check-auth');
+        return response.data;
+    }
 };
 
 export default api; 

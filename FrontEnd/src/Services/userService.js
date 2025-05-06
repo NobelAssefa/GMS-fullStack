@@ -1,12 +1,12 @@
-import axios from 'axios';
+import api from './api';
 
-const API_URL = 'http://localhost:5000/api/users'; // Update with your backend URL
+const API_URL = '/user'; // Using relative path since baseURL is set in api.js
 
 const userService = {
     // Get all users
     getAllUsers: async () => {
         try {
-            const response = await axios.get(`${API_URL}/getusers`);
+            const response = await api.get(`${API_URL}/getusers`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -16,7 +16,7 @@ const userService = {
     // Create new user
     createUser: async (userData) => {
         try {
-            const response = await axios.post(`${API_URL}/register`, userData);
+            const response = await api.post(`${API_URL}/register`, userData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -26,7 +26,7 @@ const userService = {
     // Update user
     updateUser: async (userId, userData) => {
         try {
-            const response = await axios.put(`${API_URL}/update/${userId}`, userData);
+            const response = await api.put(`${API_URL}/update/${userId}`, userData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -36,7 +36,7 @@ const userService = {
     // Delete user
     deleteUser: async (userId) => {
         try {
-            const response = await axios.put(`${API_URL}/delete/${userId}`);
+            const response = await api.put(`${API_URL}/delete/${userId}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

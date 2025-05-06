@@ -1,0 +1,121 @@
+.department-management {
+    margin-top: 20px;
+    margin-left: 24px;
+}
+
+.department-header-card {
+    background: linear-gradient(90deg, #238a8d 0%, #329c9e 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 32px 36px 24px 36px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.department-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+.department-subtitle {
+    font-size: 1.2rem;
+    color: #e0f7fa;
+    font-weight: 400;
+}
+
+.department-actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+}
+
+.department-search-section {
+    flex: 1;
+    max-width: 320px;
+}
+
+.department-search-input {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.search-icon {
+    color: #666;
+    margin-right: 8px;
+}
+
+.add-department-button {
+    background-color: #238a8d !important;
+    text-transform: none !important;
+    padding: 8px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+}
+
+.departments-table-container {
+    box-shadow: -1px 4px 14px -1px rgba(0, 0, 0, 0.13) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.MuiTableHead-root .MuiTableCell-root {
+    background-color: #fff;
+    font-weight: 600;
+    color: #333;
+    padding: 16px;
+}
+
+.MuiTableBody-root .MuiTableCell-root {
+    padding: 16px;
+}
+
+.menu-icon {
+    margin-right: 8px;
+}
+
+.delete-menu-item {
+    color: #cc6565;
+}
+
+.delete-menu-item .menu-icon {
+    color: #cc6565;
+}
+
+/* Table row hover effect */
+.MuiTableBody-root .MuiTableRow-root:hover {
+    background-color: #f8f9fa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .department-management {
+        margin-left: 0;
+    }
+    .department-header-card {
+        padding: 20px 10px 16px 10px;
+    }
+    .department-title {
+        font-size: 2rem;
+    }
+    .department-actions-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .department-search-section {
+        max-width: none;
+    }
+    .add-department-button {
+        width: 100%;
+    }
+}

@@ -63,7 +63,8 @@ const registerUser = AsyncHandler(
 const login = AsyncHandler(
     async (req, res) => {
         const { email, password } = req.body;
-        console.log({ email, password })
+        console.log('Login attempt for:', email); // Debug: Log login attempt
+        
         if (!email || !password) {
             res.status(400);
             throw new Error("please enter user credentials")
@@ -71,22 +72,22 @@ const login = AsyncHandler(
 
         // check if a user exists
         const user = await User.findOne({ email })
-        console.log(user)
+        console.log('User found:', user ? 'Yes' : 'No'); // Debug: Log if user exists
 
         if (!user) {
             res.status(400);
             throw new Error('user not found, please signup')
         }
         
-        const passwordExists = await bcrypt.compare(password,user.password)
+        const passwordExists = await bcrypt.compare(password, user.password)
+        console.log('Password match:', passwordExists); // Debug: Log password match
 
-        console.log("sent password",password)
-        console.log("stored password",user.password)
         if (!passwordExists) {
             res.status(401);
             throw new Error('Invalid email or password')
         }
         const token = generateToken(user._id)
+        console.log('Generated token:', token); // Debug: Log generated token
 
         //SENDING HTTPONLY COOKIE
         res.cookie("token", token, {
@@ -95,15 +96,12 @@ const login = AsyncHandler(
             expires: new Date(Date.now() + 1000 * 86400), // 1day
             sameSite: 'none',
             secure: true
-
         })
-
-
-
-        // check if email and password is correct
+        console.log('Cookie set with token'); // Debug: Log cookie setting
 
         if (user && passwordExists) {
             const { _id, fullName, email, phone, status } = user
+            console.log('Login successful for:', email); // Debug: Log successful login
             res.status(200).json({
                 _id, fullName, email, phone, status, token
             })
@@ -112,19 +110,15 @@ const login = AsyncHandler(
             res.status(400);
             throw new Error('Invalid credentials')
         }
-
     }
 )
 
 //LOGOUT
 const logout = AsyncHandler(async (req, res) => {
-    res.cookie("token", "", {
-        path: "/",
+    res.clearCookie("token", {
         httpOnly: true,
-        expires: new Date(0), // 1day
-        sameSite: 'none',
-        secure: true
-
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
     })
     return res.status(200).json({ message: "successfuly logged out!!!!!" })
 
@@ -223,7 +217,34 @@ const resetPassword = AsyncHandler(async (req, res) => {
 
 })
 
+const checkAuth = AsyncHandler(async (req, res) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ isAuthenticated: false });
+        }
 
+        const verified = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const user = await User.findById(verified.id).select("-password");
+        
+        if (!user) {
+            return res.status(401).json({ isAuthenticated: false });
+        }
+
+        res.status(200).json({
+            isAuthenticated: true,
+            user: {
+                _id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                phone: user.phone,
+                status: user.status
+            }
+        });
+    } catch (error) {
+        res.status(401).json({ isAuthenticated: false });
+    }
+});
 
 module.exports = {
     registerUser,
@@ -231,5 +252,6 @@ module.exports = {
     logout,
     loggedIn,
     changePassword,
-    resetPassword
+    resetPassword,
+    checkAuth
 };

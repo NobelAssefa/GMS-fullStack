@@ -5,6 +5,7 @@ const roleSchema = mongoose.Schema({
         type:String,
         required:true,
         unique:true,
+        enum: ['ADMIN', 'DIRECTOR', 'SECRATORY', 'VP',"PRESIDENT"],
     }
 
 },{

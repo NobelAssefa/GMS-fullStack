@@ -18,6 +18,7 @@ import DoneAllIcon from '@material-ui/icons/DoneAll';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import AssessmentIcon from '@material-ui/icons/Assessment';
+import BusinessIcon from '@material-ui/icons/Business';
 import { Link, useLocation } from "react-router-dom";
 import { Avatar } from "@mui/material";
 
@@ -85,6 +86,12 @@ export default function Sidebar({ isCollapsed }) {
               <li className={`sidebarListItem ${activeItem === "/reports" ? "active" : ""}`}>
                 <AssessmentIcon className="sideBarIcons" />
                 Reports  	 
+              </li>
+            </Link>
+            <Link to="/department" className="link" onClick={() => handleItemClick("/department")}>
+              <li className={`sidebarListItem ${activeItem === "/department" ? "active" : ""}`}>
+                <BusinessIcon className="sideBarIcons" />
+                Department Management  	 
               </li>
             </Link>
           </ul>

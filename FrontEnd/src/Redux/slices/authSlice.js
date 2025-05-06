@@ -16,16 +16,21 @@ const authSlice = createSlice({
             state.error = null;
         },
         loginSuccess: (state, action) => {
+            console.log('Login success action:', action.payload);
             state.user = action.payload;
             state.isAuthenticated = true;
             state.loading = false;
             state.error = null;
         },
         loginFailure: (state, action) => {
+            console.log('Login failure action:', action.payload);
             state.loading = false;
             state.error = action.payload;
+            state.user = null;
+            state.isAuthenticated = false;
         },
         logout: (state) => {
+            console.log('Logout action');
             state.user = null;
             state.isAuthenticated = false;
             state.loading = false;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     TextField,
     Button,
@@ -18,13 +18,19 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
-    const { loading, error } = useSelector((state) => state.auth);
+    const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
     
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
+
+    // Clear any existing error when component mounts
+    useEffect(() => {
+        console.log('Login component mounted, current auth state:', { isAuthenticated });
+        dispatch(clearError());
+    }, [dispatch, isAuthenticated]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -38,16 +44,20 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('Login attempt with:', { email: formData.email });
         dispatch(loginStart());
 
         try {
             const response = await authService.login(formData.email, formData.password);
+            console.log('Login successful, response:', response);
             dispatch(loginSuccess(response));
             
             // Get the redirect path from location state or default to home
             const from = location.state?.from?.pathname || '/home';
+            console.log('Redirecting to:', from);
             navigate(from, { replace: true });
         } catch (err) {
+            console.error('Login failed:', err);
             dispatch(loginFailure(err.message || 'Login failed. Please check your credentials.'));
         }
     };
