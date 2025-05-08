@@ -35,10 +35,13 @@ export default function NewDepartment() {
         e.preventDefault();
         setLoading(true);
         try {
-            await departmentService.addDepartment({ departmentName: formData.name });
+            const departmentData = { departmentName: formData.name, description: formData.description };
+            console.log('Submitting department data:', departmentData);
+            await departmentService.addDepartment(departmentData);
             setSnackbar({ open: true, message: 'Department added successfully', severity: 'success' });
             setTimeout(() => navigate('/department'), 1000);
         } catch (err) {
+            console.error('Error adding department:', err);
             setSnackbar({ open: true, message: 'Failed to add department', severity: 'error' });
         } finally {
             setLoading(false);

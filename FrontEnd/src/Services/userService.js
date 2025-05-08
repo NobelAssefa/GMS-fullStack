@@ -9,37 +9,79 @@ const userService = {
             const response = await api.get(`${API_URL}/getusers`);
             return response.data;
         } catch (error) {
-            throw error.response?.data || error.message;
+            throw error.response?.data?.message || 'Failed to fetch users';
+        }
+    },
+
+    // Get single user
+    getUser: async (id) => {
+        try {
+            const response = await api.get(`${API_URL}/getuser/${id}`, {
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to fetch user';
         }
     },
 
     // Create new user
     createUser: async (userData) => {
         try {
-            const response = await api.post(`${API_URL}/register`, userData);
+            const response = await api.post(`/auth/register`, userData, {
+                withCredentials: true
+            });
             return response.data;
         } catch (error) {
-            throw error.response?.data || error.message;
+            throw error.response?.data?.message || 'Failed to create user';
         }
     },
 
     // Update user
-    updateUser: async (userId, userData) => {
+    updateUser: async (id, userData) => {
         try {
-            const response = await api.put(`${API_URL}/update/${userId}`, userData);
+            const response = await api.put(`/user/update/${id}`, userData, {
+                withCredentials: true
+            });
             return response.data;
         } catch (error) {
-            throw error.response?.data || error.message;
+            throw error.response?.data?.message || 'Failed to update user';
         }
     },
 
     // Delete user
-    deleteUser: async (userId) => {
+    deleteUser: async (id) => {
         try {
-            const response = await api.put(`${API_URL}/delete/${userId}`);
+            const response = await api.delete(`/user/delete/${id}`, {
+                withCredentials: true
+            });
             return response.data;
         } catch (error) {
-            throw error.response?.data || error.message;
+            throw error.response?.data?.message || 'Failed to delete user';
+        }
+    },
+
+    // Get all roles
+    getRoles: async () => {
+        try {
+            const response = await api.get(`/role/getroles`, {
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to fetch roles';
+        }
+    },
+
+    // Get all departments
+    getDepartments: async () => {
+        try {
+            const response = await api.get(`/department/getdepartments`, {
+                withCredentials: true
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to fetch departments';
         }
     }
 };

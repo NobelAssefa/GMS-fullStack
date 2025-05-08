@@ -112,10 +112,12 @@ export default function UserManagement() {
     };
 
     const filteredUsers = users.filter(user =>
-        user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.role?.toLowerCase().includes(searchQuery.toLowerCase())
+        user.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.role_id?.roleName?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+
 
     return (
         <div className="user-management">
@@ -163,7 +165,7 @@ export default function UserManagement() {
                                 <TableCell>Email</TableCell>
                                 <TableCell>Role</TableCell>
                                 <TableCell>Status</TableCell>
-                                <TableCell>Last Active</TableCell>
+                                <TableCell>Department</TableCell>
                                 <TableCell align="right">Actions</TableCell>
                             </TableRow>
                         </TableHead>
@@ -194,7 +196,7 @@ export default function UserManagement() {
                                             <TableCell>{user.email}</TableCell>
                                             <TableCell>
                                                 <Chip
-                                                    label={user.role || 'No Role'}
+                                                    label={user.role_id?.roleName || 'No Role'}
                                                     color="primary"
                                                     variant="outlined"
                                                     size="small"
@@ -207,7 +209,12 @@ export default function UserManagement() {
                                                     size="small"
                                                 />
                                             </TableCell>
-                                            <TableCell>{user.lastActive || 'N/A'}</TableCell>
+                                            <TableCell><Chip
+                                                label={user.department_id?.departmentName || 'No Department'}
+                                                color="primary"
+                                                variant="outlined"
+                                                size="small"
+                                            /></TableCell>
                                             <TableCell align="right">
                                                 <IconButton
                                                     size="small"

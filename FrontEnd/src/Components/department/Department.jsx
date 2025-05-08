@@ -100,7 +100,7 @@ export default function Department() {
     };
 
     const filteredDepartments = departments.filter(dept =>
-        dept.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        dept.departmentName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         dept.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 

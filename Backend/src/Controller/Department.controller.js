@@ -3,16 +3,23 @@ const Department = require('../Models/Department.model');
 
 
 const createDepartment = AsyncHandler(async (req,res)=>{
+    console.log('Received department creation request:', req.body);
     const {departmentName, description}= req.body;
+    
+    if (!departmentName) {
+        res.status(400);
+        throw new Error('Department name is required');
+    }
+
     const departmentExist = await Department.findOne({departmentName})
     if(departmentExist){
         res.status(400);
-        throw new Error('department already registerd')
+        throw new Error('department already registered')
     }
 
     const department = await Department.create({departmentName, description});
+    console.log('Created department:', department);
     res.status(201).json(department)
-
 });
 
 const getDepartment = AsyncHandler (async (req,res)=>{

@@ -10,31 +10,36 @@ const { is_Admin } = require('../Middlewares/authMiddleware')
 //USER REGISTRATION
 const registerUser = AsyncHandler(
     async (req, res) => {
-        const { fullName, email, password, phone, status, role_id, department_id,is_Admin } = req.body;
+        const { fullName, email, password, phone, status, role_id, department_id, is_Admin } = req.body;
 
         if (!fullName || !email || !password) {
             res.status(400);
             throw new Error("Please fill all required forms");
-
         }
         if (password.length < 6) {
             res.status(400);
-            throw new Error("password must be greater than 6 characters")
+            throw new Error("password must be greater than 6 characters");
         }
 
-
-        const userExist = await User.findOne({ email })
+        const userExist = await User.findOne({ email });
         if (userExist) {
             res.status(400);
-            throw new Error("email is already registerd!")
+            throw new Error("email is already registerd!");
         }
+
+        // Create user with role and department IDs
         const user = await User.create({
-            fullName, email, password, phone, status, role_id, department_id,is_Admin
-        })
+            fullName,
+            email,
+            password,
+            phone,
+            status,
+            role_id,
+            department_id,
+            is_Admin
+        });
 
-
-
-        const token = generateToken(user._id)
+        const token = generateToken(user._id);
 
         //SENDING HTTPONLY COOKIE
         res.cookie("token", token, {
@@ -43,24 +48,40 @@ const registerUser = AsyncHandler(
             expires: new Date(Date.now() + 1000 * 86400), // 1day
             sameSite: 'none',
             secure: true
-
-        })
+        });
 
         if (user) {
-            const { _id, fullName, email, phone, status,is_Admin,role_id,token } = user
+            // Populate role and department before sending response
+            const populatedUser = await User.findById(user._id)
+                .populate('role_id', 'roleName')
+                .populate('department_id', 'departmentName');
+
+            const { _id, fullName, email, phone, status, role_id, department_id, is_Admin } = populatedUser;
             res.status(201).json({
-                _id, fullName, email, phone, status, token,is_Admin,role_id
-            })
+                _id,
+                fullName,
+                email,
+                phone,
+                status,
+                role: role_id ? {
+                    _id: role_id._id,
+                    roleName: role_id.roleName
+                } : null,
+                department: department_id ? {
+                    _id: department_id._id,
+                    departmentName: department_id.departmentName
+                } : null,
+                is_Admin,
+                token
+            });
         } else {
             res.status(400);
-            throw new Error("Invalid user!")
+            throw new Error("Invalid user!");
         }
-
     }
-)
+);
 
 // LOGIN
-
 const login = AsyncHandler(
     async (req, res) => {
         const { email, password } = req.body;
@@ -68,26 +89,29 @@ const login = AsyncHandler(
         
         if (!email || !password) {
             res.status(400);
-            throw new Error("please enter user credentials")
+            throw new Error("please enter user credentials");
         }
 
         // check if a user exists
         const user = await User.findOne({ email })
+            .populate('role_id', 'roleName')
+            .populate('department_id', 'departmentName');
+            
         console.log('User found:', user ? 'Yes' : 'No'); // Debug: Log if user exists
 
         if (!user) {
             res.status(400);
-            throw new Error('user not found, please signup')
+            throw new Error('user not found, please signup');
         }
         
-        const passwordExists = await bcrypt.compare(password, user.password)
+        const passwordExists = await bcrypt.compare(password, user.password);
         console.log('Password match:', passwordExists); // Debug: Log password match
 
         if (!passwordExists) {
             res.status(401);
-            throw new Error('Invalid email or password')
+            throw new Error('Invalid email or password');
         }
-        const token = generateToken(user._id)
+        const token = generateToken(user._id);
         console.log('Generated token:', token); // Debug: Log generated token
 
         //SENDING HTTPONLY COOKIE
@@ -97,22 +121,35 @@ const login = AsyncHandler(
             expires: new Date(Date.now() + 1000 * 86400), // 1day
             sameSite: 'none',
             secure: true
-        })
+        });
         console.log('Cookie set with token'); // Debug: Log cookie setting
 
         if (user && passwordExists) {
-            const { _id, fullName, email, phone, status,role_id,is_Admin } = user
+            const { _id, fullName, email, phone, status, role_id, department_id, is_Admin } = user;
             console.log('Login successful for:', email); // Debug: Log successful login
             res.status(200).json({
-                _id, fullName, email, phone, status, role_id,token,is_Admin,
-            })
-        }
-        else {
+                _id,
+                fullName,
+                email,
+                phone,
+                status,
+                role: role_id ? {
+                    _id: role_id._id,
+                    roleName: role_id.roleName
+                } : null,
+                department: department_id ? {
+                    _id: department_id._id,
+                    departmentName: department_id.departmentName
+                } : null,
+                is_Admin,
+                token
+            });
+        } else {
             res.status(400);
-            throw new Error('Invalid credentials')
+            throw new Error('Invalid credentials');
         }
     }
-)
+);
 
 //LOGOUT
 const logout = AsyncHandler(async (req, res) => {

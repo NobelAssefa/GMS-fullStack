@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Button,
@@ -12,7 +12,9 @@ import {
     MenuItem,
     IconButton,
     Snackbar,
-    Alert
+    Alert,
+    FormControlLabel,
+    Switch
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -24,20 +26,44 @@ const NewUser = () => {
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
-        phone: '',
+        phone: '+251',
         role_id: '',
         department_id: '',
         password: '',
         confirmPassword: '',
+        status: true,
+        is_Admin: false
     });
+    const [roles, setRoles] = useState([]);
+    const [departments, setDepartments] = useState([]);
     const [errors, setErrors] = useState({});
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        // Fetch roles and departments
+        const fetchData = async () => {
+            try {
+                console.log("trying to featch roles and departments ");
+                
+                const [rolesData, departmentsData] = await Promise.all([
+                    userService.getRoles(),
+                    userService.getDepartments()
+                ]);
+                setRoles(rolesData);
+                setDepartments(departmentsData);
+            } catch (error) {
+                showSnackbar('Failed to load roles and departments', 'error');
+            }
+        };
+        fetchData();
+    }, []);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: e.target.type === 'checkbox' ? checked : value
         }));
         // Clear error when user starts typing
         if (errors[name]) {
@@ -50,6 +76,8 @@ const NewUser = () => {
         
         if (!formData.fullName) newErrors.fullName = 'Full name is required';
         if (!formData.email) newErrors.email = 'Email is required';
+        if (!formData.role_id) newErrors.role_id = 'Role is required';
+        if (!formData.department_id) newErrors.department_id = 'Department is required';
         if (!formData.password) newErrors.password = 'Password is required';
         if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
         if (formData.password !== formData.confirmPassword) {
@@ -67,14 +95,17 @@ const NewUser = () => {
             return;
         }
 
+        setLoading(true);
         try {
             // Remove confirmPassword before sending to API
             const { confirmPassword, ...userData } = formData;
             await userService.createUser(userData);
             showSnackbar('User created successfully');
-            navigate('/users');
+            navigate('/user');
         } catch (error) {
             showSnackbar(error.message || 'Failed to create user', 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -87,7 +118,7 @@ const NewUser = () => {
             <Paper elevation={3} sx={{ p: 4, maxWidth: 800, mx: 'auto' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                     <IconButton 
-                        onClick={() => navigate('/users')}
+                        onClick={() => navigate('/user')}
                         sx={{ mr: 2 }}
                         aria-label="back"
                     >
@@ -110,6 +141,7 @@ const NewUser = () => {
                                 error={!!errors.fullName}
                                 helperText={errors.fullName}
                                 required
+                                disabled={loading}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -123,6 +155,7 @@ const NewUser = () => {
                                 error={!!errors.email}
                                 helperText={errors.email}
                                 required
+                                disabled={loading}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -132,37 +165,53 @@ const NewUser = () => {
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleChange}
+                                disabled={loading}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
+                            <FormControl fullWidth error={!!errors.role_id} disabled={loading}>
                                 <InputLabel>Role</InputLabel>
                                 <Select
                                     name="role_id"
                                     value={formData.role_id}
                                     onChange={handleChange}
                                     label="Role"
+                                    required
                                 >
-                                    <MenuItem value="1">Admin</MenuItem>
-                                    <MenuItem value="2">Manager</MenuItem>
-                                    <MenuItem value="3">User</MenuItem>
+                                    {roles.map((role) => (
+                                        <MenuItem key={role._id} value={role._id}>
+                                            {role.roleName}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
+                                {errors.role_id && (
+                                    <Typography color="error" variant="caption">
+                                        {errors.role_id}
+                                    </Typography>
+                                )}
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth>
+                            <FormControl fullWidth error={!!errors.department_id} disabled={loading}>
                                 <InputLabel>Department</InputLabel>
                                 <Select
                                     name="department_id"
                                     value={formData.department_id}
                                     onChange={handleChange}
                                     label="Department"
+                                    required
                                 >
-                                    <MenuItem value="1">IT</MenuItem>
-                                    <MenuItem value="2">HR</MenuItem>
-                                    <MenuItem value="3">Finance</MenuItem>
-                                    <MenuItem value="4">Marketing</MenuItem>
+                                    {departments.map((dept) => (
+                                        <MenuItem key={dept._id} value={dept._id}>
+                                            {dept.departmentName}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
+                                {errors.department_id && (
+                                    <Typography color="error" variant="caption">
+                                        {errors.department_id}
+                                    </Typography>
+                                )}
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -176,6 +225,7 @@ const NewUser = () => {
                                 error={!!errors.password}
                                 helperText={errors.password}
                                 required
+                                disabled={loading}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -189,6 +239,33 @@ const NewUser = () => {
                                 error={!!errors.confirmPassword}
                                 helperText={errors.confirmPassword}
                                 required
+                                disabled={loading}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={formData.status}
+                                        onChange={handleChange}
+                                        name="status"
+                                        disabled={loading}
+                                    />
+                                }
+                                label="Active"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={formData.is_Admin}
+                                        onChange={handleChange}
+                                        name="is_Admin"
+                                        disabled={loading}
+                                    />
+                                }
+                                label="Admin Access"
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -196,6 +273,7 @@ const NewUser = () => {
                                 <Button
                                     variant="outlined"
                                     onClick={() => navigate('/users')}
+                                    disabled={loading}
                                 >
                                     Cancel
                                 </Button>
@@ -203,8 +281,9 @@ const NewUser = () => {
                                     type="submit"
                                     variant="contained"
                                     color="primary"
+                                    disabled={loading}
                                 >
-                                    Create User
+                                    {loading ? 'Creating...' : 'Create User'}
                                 </Button>
                             </Box>
                         </Grid>

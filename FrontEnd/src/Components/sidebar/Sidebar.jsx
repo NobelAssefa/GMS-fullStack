@@ -21,10 +21,13 @@ import AssessmentIcon from '@material-ui/icons/Assessment';
 import BusinessIcon from '@material-ui/icons/Business';
 import { Link, useLocation } from "react-router-dom";
 import { Avatar } from "@mui/material";
+import { useSelector } from 'react-redux';
 
 export default function Sidebar({ isCollapsed }) {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("");
+  const { user } = useSelector((state) => state.auth);
+  const isAdmin = user?.is_Admin;
 
   useEffect(() => {
     // Set active item based on current path
@@ -76,37 +79,41 @@ export default function Sidebar({ isCollapsed }) {
                 CheckIn Panel	 
               </li>
             </Link>
-            <Link to="/user" className="link" onClick={() => handleItemClick("/user")}>
-              <li className={`sidebarListItem ${activeItem === "/user" ? "active" : ""}`}>
-                <SupervisorAccountIcon className="sideBarIcons" />
-                User Management 	 
-              </li>
-            </Link>
-            <Link to="/reports" className="link" onClick={() => handleItemClick("/reports")}>
-              <li className={`sidebarListItem ${activeItem === "/reports" ? "active" : ""}`}>
-                <AssessmentIcon className="sideBarIcons" />
-                Reports  	 
-              </li>
-            </Link>
-            <Link to="/department" className="link" onClick={() => handleItemClick("/department")}>
-              <li className={`sidebarListItem ${activeItem === "/department" ? "active" : ""}`}>
-                <BusinessIcon className="sideBarIcons" />
-                Department Mgmt.  	 
-              </li>
-            </Link>
+            {isAdmin && (
+              <>
+                <Link to="/user" className="link" onClick={() => handleItemClick("/user")}>
+                  <li className={`sidebarListItem ${activeItem === "/user" ? "active" : ""}`}>
+                    <SupervisorAccountIcon className="sideBarIcons" />
+                    User Management 	 
+                  </li>
+                </Link>
+                <Link to="/reports" className="link" onClick={() => handleItemClick("/reports")}>
+                  <li className={`sidebarListItem ${activeItem === "/reports" ? "active" : ""}`}>
+                    <AssessmentIcon className="sideBarIcons" />
+                    Reports  	 
+                  </li>
+                </Link>
+                <Link to="/department" className="link" onClick={() => handleItemClick("/department")}>
+                  <li className={`sidebarListItem ${activeItem === "/department" ? "active" : ""}`}>
+                    <BusinessIcon className="sideBarIcons" />
+                    Department Mgmt.  	 
+                  </li>
+                </Link>
+              </>
+            )}
           </ul>
         </div>
         <div className="sidebarFooter">
           <div className="userProfile">
             <Avatar 
-              alt="User Avatar" 
-              src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=400" 
+              alt={user?.fullName || "User"} 
+              src={user?.img || "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=400"} 
               className="userAvatar"
             />
             {!isCollapsed && (
               <div className="userInfo">
-                <span className="userName">John Doe</span>
-                <span className="userRole">Administrator</span>
+                <span className="userName">{user?.fullName || "User"}</span>
+                <span className="userRole">{isAdmin ? "Administrator" : "User"}</span>
               </div>
             )}
           </div>

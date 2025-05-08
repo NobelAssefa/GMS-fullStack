@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const {registerUser, login, logout, checkAuth} = require('../Controller/Auth.controller');
-const authMiddleware = require('../Middlewares/authMiddleware');
+const {authMiddleware,is_Admin} = require('../Middlewares/authMiddleware');
 // ,getProfile,loggedIn,updateProfile,changePassword, resetPassword
-router.post('/register', registerUser);
+
+router.post('/register',authMiddleware, is_Admin,registerUser);
 router.post('/login', login)
 router.post('/logout', logout)
 router.get('/check-auth', checkAuth)

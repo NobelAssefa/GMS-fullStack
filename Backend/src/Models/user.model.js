@@ -31,10 +31,10 @@ const userSchema = mongoose.Schema({
         type:Boolean,
         default:true
     },
-    role:{
+    role_id:{
         type:mongoose.Schema.Types.ObjectId,ref:"Role"
     },
-    department:{
+    department_id:{
         type:mongoose.Schema.Types.ObjectId,ref:"Department"
     },
     is_Admin:{
