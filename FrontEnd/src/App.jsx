@@ -63,61 +63,61 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <Router>
+      <Router>
           <AuthProvider>
-            <PageWrapper>
-              <Routes>
-                {/* Login Route - Public */}
-                <Route path="/login" element={<LoginPage />} />
-                
-                {/* Protected Routes */}
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Home />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/home" element={
-                  <ProtectedRoute>
-                    <Home />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/user" element={
-                  <ProtectedRoute>
-                    <UserManagementPage />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/users/new" element={
-                  <ProtectedRoute>
-                    <NewUser />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/guest/registration" element={
-                  <ProtectedRoute>
-                    <GuestRegistrationPage />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/visit/request" element={
-                  <ProtectedRoute>
-                    <VisitRequestPage />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/visit/approval" element={
-                  <ProtectedRoute>
-                    <VisitApprovalPage />
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/checkin" element={
-                  <ProtectedRoute>
-                    <CheckInPanelPage />
-                  </ProtectedRoute>
-                } />
+        <PageWrapper>
+          <Routes>
+            {/* Login Route - Public */}
+            <Route path="/login" element={<LoginPage />} />
+            
+            {/* Protected Routes */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/home" element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/user" element={
+              <ProtectedRoute>
+                <UserManagementPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/users/new" element={
+              <ProtectedRoute>
+                <NewUser />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/guest/registration" element={
+              <ProtectedRoute>
+                <GuestRegistrationPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/visit/request" element={
+              <ProtectedRoute>
+                <VisitRequestPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/visit/approval" element={
+              <ProtectedRoute>
+                <VisitApprovalPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/checkin" element={
+              <ProtectedRoute>
+                <CheckInPanelPage />
+              </ProtectedRoute>
+            } />
                 
                 <Route path="/department" element={
                   <ProtectedRoute>
@@ -136,13 +136,13 @@ function App() {
                     <NewRolePage />
                   </ProtectedRoute>
                 } />
-                
-                {/* Catch all - 404 */}
-                <Route path="*" element={<Navigate to="/home" replace />} />
-              </Routes>
-            </PageWrapper>
+            
+            {/* Catch all - 404 */}
+            <Route path="*" element={<Navigate to="/home" replace />} />
+          </Routes>
+        </PageWrapper>
           </AuthProvider>
-        </Router>
+      </Router>
       </PersistGate>
     </Provider>
   );

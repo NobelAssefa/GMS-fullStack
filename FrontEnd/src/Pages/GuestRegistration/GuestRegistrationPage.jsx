@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import './guestRegistration.css';
 import GuestForm from '../../Components/guestForm/GuestForm';
 import { Alert, Snackbar } from '@mui/material';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import guestService from '../../Services/guestService';
 
 export default function GuestRegistrationPage() {
     const [feedback, setFeedback] = useState({
@@ -15,8 +15,32 @@ export default function GuestRegistrationPage() {
 
     const handleGuestSubmit = async (formData) => {
         try {
-            // Show loading state if needed
-            const response = await axios.post('/api/guests/register', formData);
+            console.log('Form data received:', formData); // Debug log
+
+            // Transform form data to match backend model
+            const guestData = {
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                is_vip: formData.isVip,
+                has_car: formData.hasCar,
+                profileImage: formData.profileImage,
+                // Car details will be handled by the backend if has_car is true
+                plateNumber: formData.hasCar ? formData.plateNumber : undefined,
+                carModel: formData.hasCar ? formData.carModel : undefined,
+                carColor: formData.hasCar ? formData.carColor : undefined,
+                // Format items data
+                items: Array.isArray(formData.items) ? formData.items.map(item => ({
+                    name: typeof item === 'string' ? item : item.name,
+                    description: typeof item === 'string' ? '' : (item.description || ''),
+                    isChecked: typeof item === 'string' ? false : (item.isChecked || false)
+                })) : []
+            };
+
+            console.log('Transformed guest data:', guestData); // Debug log
+
+            const response = await guestService.registerGuest(guestData);
+            console.log('Registration response:', response); // Debug log
             
             setFeedback({
                 open: true,
@@ -33,7 +57,7 @@ export default function GuestRegistrationPage() {
             console.error('Registration error:', error);
             setFeedback({
                 open: true,
-                message: error.response?.data?.message || 'Failed to register guest. Please try again.',
+                message: error.message || 'Failed to register guest. Please try again.',
                 severity: 'error'
             });
         }

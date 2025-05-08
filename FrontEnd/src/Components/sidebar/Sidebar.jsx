@@ -28,6 +28,7 @@ export default function Sidebar({ isCollapsed }) {
   const [activeItem, setActiveItem] = useState("");
   const { user } = useSelector((state) => state.auth);
   const isAdmin = user?.is_Admin;
+  const role = user?.role_id?.roleName;
 
   useEffect(() => {
     // Set active item based on current path
@@ -73,12 +74,12 @@ export default function Sidebar({ isCollapsed }) {
                 Visit Approvals	 
               </li>
             </Link>
-            <Link to="/checkin" className="link" onClick={() => handleItemClick("/checkin")}>
+            {role === "SECURITY" && <Link to="/checkin" className="link" onClick={() => handleItemClick("/checkin")}>
               <li className={`sidebarListItem ${activeItem === "/checkin" ? "active" : ""}`}>
                 <OpenInNewIcon className="sideBarIcons" />
                 CheckIn Panel	 
               </li>
-            </Link>
+            </Link>}
             {isAdmin && (
               <>
                 <Link to="/user" className="link" onClick={() => handleItemClick("/user")}>

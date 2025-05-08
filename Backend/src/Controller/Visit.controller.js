@@ -64,6 +64,19 @@ const getVisits = AsyncHandler(async (req, res) => {
     res.status(200).json(visits);
 });
 
+const getVisitsByUserId = AsyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    if (!userId) {
+        res.status(400);
+        throw new Error('User ID is required');
+    }
+    const visits = await Visit.find({ user_id: userId })
+        .populate('guest_id', 'fullName email')
+        .populate('user_id', 'fullName email')
+        .populate('department_id', 'departmentName');
+    res.status(200).json(visits);
+});
+
 const approveVisit = AsyncHandler(async (req, res) => {
     const visit = await Visit.findById(req.params.id);
 
@@ -120,5 +133,10 @@ const checkOutVisit = AsyncHandler(async (req, res) => {
 })
 
 module.exports = {
-    createVisit,getVisits,approveVisit,checkInVisit,checkOutVisit
+    createVisit,
+    getVisits,
+    getVisitsByUserId,
+    approveVisit,
+    checkInVisit,
+    checkOutVisit
 }

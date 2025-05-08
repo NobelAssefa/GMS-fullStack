@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import './visitRequestForm.css';
-import { Autocomplete, TextField, Switch, FormControlLabel } from '@mui/material';
+import { Autocomplete, TextField, Switch, FormControlLabel, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
 import Checkbox from '@mui/material/Checkbox';
 import AddIcon from '@mui/icons-material/Add';
+import guestService from '../../Services/guestService';
+import { getAllDepartments } from '../../Services/departmentService';
+import { useSelector } from 'react-redux';
+import UserVisitRequestsTable from './UserVisitRequestsTable';
 
 export default function VisitRequestForm({ onSubmit }) {
+    const { user } = useSelector((state) => state.auth);
     const [formData, setFormData] = useState({
         guest: null,
-        department: '',
+        department: null,
         visitDate: null,
-        isVip: false,
+        dateRange: [null, null],
+        durationType: 'single', // 'single' or 'range'
         hasCar: false,
         plateNumber: '',
         carModel: '',
@@ -21,34 +28,50 @@ export default function VisitRequestForm({ onSubmit }) {
         remark: ''
     });
 
-    // Mock data for guests - replace with actual API call
     const [guests, setGuests] = useState([]);
+    const [departments, setDepartments] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showOtherItemInput, setShowOtherItemInput] = useState(false);
     const [newItem, setNewItem] = useState('');
 
-    // Predefined lists
     const predefinedItems = ['Laptop', 'Phone', 'Tablet', 'Camera', 'Other'];
-    const departments = [
-        'Human Resources',
-        'Information Technology',
-        'Finance',
-        'Operations',
-        'Marketing',
-        'Research & Development',
-        'Legal',
-        'Administration'
-    ];
 
     useEffect(() => {
-        // Mock guest data - replace with actual API call
-        const mockGuests = [
-            { id: 1, fullName: 'John Doe', email: 'john@example.com' },
-            { id: 2, fullName: 'Jane Smith', email: 'jane@example.com' },
-            // Add more mock data as needed
-        ];
-        setGuests(mockGuests);
-    }, []);
+        async function fetchData() {
+            try {
+                const guestsData = await guestService.getAllGuests();
+                let guestsArr = [];
+                if (Array.isArray(guestsData)) {
+                    guestsArr = guestsData;
+                } else if (guestsData && Array.isArray(guestsData.guests)) {
+                    guestsArr = guestsData.guests;
+                }
+                setGuests(guestsArr);
+
+                const departmentsData = await getAllDepartments();
+                setDepartments(departmentsData);
+
+                // Only set department if user and departments are loaded
+                if (user && user.department && departmentsData.length > 0) {
+                    // Try to match by _id or departmentName
+                    const userDept = departmentsData.find(
+                        d =>
+                            d._id === user.department._id ||
+                            d._id === user.department ||
+                            d.departmentName === user.department.departmentName ||
+                            d.departmentName === user.department
+                    );
+                    if (!userDept) {
+                        console.warn('Could not auto-select user department:', user.department, departmentsData);
+                    }
+                    setFormData(prev => ({ ...prev, department: userDept || null }));
+                }
+            } catch (err) {
+                console.error('Failed to fetch guests or departments:', err);
+            }
+        }
+        fetchData();
+    }, [user]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -95,30 +118,41 @@ export default function VisitRequestForm({ onSubmit }) {
         }
     };
 
+    const handleDurationTypeChange = (event) => {
+        setFormData(prev => ({ ...prev, durationType: event.target.value, visitDate: null, dateRange: [null, null] }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
-
         try {
             setIsSubmitting(true);
-            const submitData = {
-                ...formData,
+            // Prepare data for backend
+            let submitData = {
+                guest_id: formData.guest?._id || formData.guest?.id,
+                department_id: formData.department?._id || formData.department?.id,
+                remark: formData.remark,
+                car: formData.hasCar ? {
+                    plateNumber: formData.plateNumber,
+                    carModel: formData.carModel,
+                    carColor: formData.carColor
+                } : undefined,
+                items: formData.items
             };
-
-            if (!submitData.hasCar) {
-                delete submitData.plateNumber;
-                delete submitData.carModel;
-                delete submitData.carColor;
+            if (formData.durationType === 'single') {
+                submitData.visit_date = formData.visitDate;
+                submitData.duration = 'single';
+            } else {
+                submitData.visit_date = formData.dateRange[0];
+                submitData.duration = formData.dateRange[1];
             }
-
             await onSubmit(submitData);
-            
-            // Reset form
             setFormData({
                 guest: null,
-                department: '',
+                department: formData.department, // keep department selected
                 visitDate: null,
-                isVip: false,
+                dateRange: [null, null],
+                durationType: 'single',
                 hasCar: false,
                 plateNumber: '',
                 carModel: '',
@@ -128,7 +162,6 @@ export default function VisitRequestForm({ onSubmit }) {
             });
             setShowOtherItemInput(false);
             setNewItem('');
-
         } catch (error) {
             console.error('Form submission error:', error);
         } finally {
@@ -142,14 +175,13 @@ export default function VisitRequestForm({ onSubmit }) {
                 <h2>Visit Request</h2>
                 <p>Fill in visit details</p>
             </div>
-            
             <form onSubmit={handleSubmit} className="visit-form">
                 <div className="form-content">
                     <div className="form-fields">
                         <div className="form-group">
                             <Autocomplete
                                 options={guests}
-                                getOptionLabel={(option) => `${option.fullName} (${option.email})`}
+                                getOptionLabel={(option) => option.fullName ? `${option.fullName} (${option.email})` : ''}
                                 value={formData.guest}
                                 onChange={(event, newValue) => {
                                     setFormData(prevState => ({
@@ -167,64 +199,95 @@ export default function VisitRequestForm({ onSubmit }) {
                                 )}
                             />
                         </div>
-
                         <div className="form-group">
                             <Autocomplete
                                 options={departments}
+                                getOptionLabel={(option) => option.departmentName || option}
                                 value={formData.department}
                                 onChange={(event, newValue) => {
-                                    setFormData(prevState => ({
-                                        ...prevState,
-                                        department: newValue
-                                    }));
+                                    if (!formData.department) {
+                                        setFormData(prevState => ({
+                                            ...prevState,
+                                            department: newValue
+                                        }));
+                                    }
                                 }}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
                                         label="Department"
                                         required
-                                        disabled={isSubmitting}
+                                        disabled={!!formData.department}
                                     />
                                 )}
+                                disabled={!!formData.department}
                             />
                         </div>
-
                         <div className="form-group">
-                            <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                <DatePicker
-                                    label="Visit Date"
-                                    value={formData.visitDate}
-                                    onChange={(newValue) => {
-                                        setFormData(prevState => ({
-                                            ...prevState,
-                                            visitDate: newValue
-                                        }));
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            required
-                                            disabled={isSubmitting}
-                                            fullWidth
-                                        />
-                                    )}
+                            <FormControl fullWidth>
+                                <InputLabel id="duration-type-label">Duration</InputLabel>
+                                <Select
+                                    labelId="duration-type-label"
+                                    value={formData.durationType}
+                                    label="Duration"
+                                    onChange={handleDurationTypeChange}
                                     disabled={isSubmitting}
-                                />
-                            </LocalizationProvider>
+                                >
+                                    <MenuItem value="single">Single Day</MenuItem>
+                                    <MenuItem value="range">Range</MenuItem>
+                                </Select>
+                            </FormControl>
                         </div>
-
-                        <div className="form-toggles">
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={formData.isVip}
-                                        onChange={handleToggleChange('isVip')}
-                                        color="primary"
+                        {formData.durationType === 'single' ? (
+                            <div className="form-group">
+                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                    <DatePicker
+                                        label="Visit Date"
+                                        value={formData.visitDate}
+                                        onChange={(newValue) => {
+                                            setFormData(prevState => ({
+                                                ...prevState,
+                                                visitDate: newValue
+                                            }));
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                required
+                                                disabled={isSubmitting}
+                                                fullWidth
+                                            />
+                                        )}
                                         disabled={isSubmitting}
                                     />
-                                }
-                                label="VIP Visit"
-                            />
+                                </LocalizationProvider>
+                            </div>
+                        ) : (
+                            <div className="form-group">
+                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                    <DateRangePicker
+                                        startText="Start Date"
+                                        endText="End Date"
+                                        value={formData.dateRange}
+                                        onChange={(newValue) => {
+                                            setFormData(prevState => ({
+                                                ...prevState,
+                                                dateRange: newValue
+                                            }));
+                                        }}
+                                        renderInput={(startProps, endProps) => (
+                                            <>
+                                                <TextField {...startProps} required disabled={isSubmitting} fullWidth />
+                                                <span style={{ margin: '0 8px' }}>to</span>
+                                                <TextField {...endProps} required disabled={isSubmitting} fullWidth />
+                                            </>
+                                        )}
+                                        disabled={isSubmitting}
+                                    />
+                                </LocalizationProvider>
+                            </div>
+                        )}
+                        <div className="form-toggles">
                             <FormControlLabel
                                 control={
                                     <Switch
@@ -237,7 +300,6 @@ export default function VisitRequestForm({ onSubmit }) {
                                 label="Has Car"
                             />
                         </div>
-
                         {formData.hasCar && (
                             <div className="car-details">
                                 <div className="form-row">
@@ -263,25 +325,24 @@ export default function VisitRequestForm({ onSubmit }) {
                                             fullWidth
                                         />
                                     </div>
-                                </div>
-                                <div className="form-group">
-                                    <TextField
-                                        label="Car Color"
-                                        name="carColor"
-                                        value={formData.carColor}
-                                        onChange={handleInputChange}
-                                        required
-                                        disabled={isSubmitting}
-                                        fullWidth
-                                    />
+                                    <div className="form-group">
+                                        <TextField
+                                            label="Car Color"
+                                            name="carColor"
+                                            value={formData.carColor}
+                                            onChange={handleInputChange}
+                                            required
+                                            disabled={isSubmitting}
+                                            fullWidth
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}
-
                         <div className="items-section">
-                            <h3>Items Carrying</h3>
+                            <label>Items Carrying</label>
                             <div className="items-grid">
-                                {predefinedItems.map((item) => (
+                                {predefinedItems.map(item => (
                                     <FormControlLabel
                                         key={item}
                                         control={
@@ -295,78 +356,53 @@ export default function VisitRequestForm({ onSubmit }) {
                                     />
                                 ))}
                             </div>
-
                             {showOtherItemInput && (
                                 <div className="other-item-input">
-                                    <div className="input-with-button">
-                                        <TextField
-                                            value={newItem}
-                                            onChange={(e) => setNewItem(e.target.value)}
-                                            placeholder="Enter item name"
-                                            disabled={isSubmitting}
-                                            fullWidth
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={handleAddNewItem}
-                                            disabled={!newItem.trim() || isSubmitting}
-                                            className="add-item-button"
-                                        >
-                                            <AddIcon />
-                                        </button>
-                                    </div>
-                                    {formData.items.filter(item => !predefinedItems.includes(item)).length > 0 && (
-                                        <div className="custom-items-list">
-                                            {formData.items
-                                                .filter(item => !predefinedItems.includes(item))
-                                                .map((item, index) => (
-                                                    <div key={index} className="custom-item">
-                                                        <span>{item}</span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setFormData(prevState => ({
-                                                                    ...prevState,
-                                                                    items: prevState.items.filter(i => i !== item)
-                                                                }));
-                                                            }}
-                                                            className="remove-item-button"
-                                                            disabled={isSubmitting}
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                        </div>
-                                    )}
+                                    <input
+                                        type="text"
+                                        value={newItem}
+                                        onChange={(e) => setNewItem(e.target.value)}
+                                        placeholder="Enter item name"
+                                        disabled={isSubmitting}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleAddNewItem}
+                                        disabled={!newItem.trim() || isSubmitting}
+                                        className="add-item-btn"
+                                    >
+                                        <AddIcon /> Add Item
+                                    </button>
                                 </div>
                             )}
                         </div>
-
                         <div className="form-group">
                             <TextField
-                                label="Remarks"
+                                label="Remark"
                                 name="remark"
                                 value={formData.remark}
                                 onChange={handleInputChange}
                                 multiline
-                                rows={4}
-                                disabled={isSubmitting}
+                                rows={2}
                                 fullWidth
+                                disabled={isSubmitting}
                             />
+                        </div>
+                        <div className="form-actions">
+                            <button
+                                type="submit"
+                                className="submit-button"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Submitting...' : 'Submit Visit Request'}
+                            </button>
                         </div>
                     </div>
                 </div>
-
-                <div className="form-actions">
-                    <button type="submit" className="submit-button" disabled={isSubmitting}>
-                        {isSubmitting ? 'Submitting...' : 'Submit Request'}
-                    </button>
-                    <button type="button" className="cancel-button" disabled={isSubmitting}>
-                        Cancel
-                    </button>
-                </div>
             </form>
+            <div style={{ marginTop: 40 }}>
+                <UserVisitRequestsTable />
+            </div>
         </div>
     );
 } 

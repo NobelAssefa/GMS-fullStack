@@ -4,7 +4,7 @@ const {registerUser, login, logout, checkAuth} = require('../Controller/Auth.con
 const {authMiddleware,is_Admin} = require('../Middlewares/authMiddleware');
 // ,getProfile,loggedIn,updateProfile,changePassword, resetPassword
 
-router.post('/register',authMiddleware, is_Admin,registerUser);
+router.post('/register',authMiddleware,is_Admin,registerUser);
 router.post('/login', login)
 router.post('/logout', logout)
 router.get('/check-auth', checkAuth)

@@ -28,7 +28,15 @@ const userService = {
     // Create new user
     createUser: async (userData) => {
         try {
-            const response = await api.post(`/auth/register`, userData, {
+            const emailNormalized = userData.email.trim().toLowerCase();
+            const userExist = await api.get(`${API_URL}/checkemail/${emailNormalized}`);
+            if (userExist.data.exists) {
+                throw new Error("email is already registered");
+            }
+            const response = await api.post(`/auth/register`, {
+                ...userData,
+                email: emailNormalized
+            }, {
                 withCredentials: true
             });
             return response.data;

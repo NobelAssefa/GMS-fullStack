@@ -1,31 +1,35 @@
 const mongoose = require('mongoose')
 
 const visitSchema = mongoose.Schema({
-    guest_id:{
-        type:mongoose.Schema.Types.ObjectId,ref:"Guest"
+    guest_id: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'Guest', required: true
     },
-    user_id:{
-        type:mongoose.Schema.Types.ObjectId,ref:"User"
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
     },
-    department_id:{
-        type:mongoose.Schema.Types.ObjectId,ref:"Department"
+    department_id: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'Department', required: true
     },
-    visit_date:Date,
-    createdAt:{
-        type:Date,
-        default:Date.now
+    car: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'Car'
     },
-    duration:String,
-    unique_code:String,
-    is_approved:{type:Boolean,default:false},
-    checked_in:{type:Boolean,default:false},
-    checked_out:{type:Boolean,default:false},
-    
-},{
-    timestamps:true
+    items: [{
+        type: mongoose.Schema.Types.ObjectId, ref: 'Item'
+    }],
+    visit_date: { type: Date, default: Date.now },
+    duration: String,
+    unique_code: String,
+    is_approved: { type: Boolean, default: false },
+    checked_in: { type: Boolean, default: false },
+    checked_out: { type: Boolean, default: false },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+}, {
+    timestamps: true
 });
 
-
-module.exports = mongoose.model("Visit", visitSchema);
+module.exports = mongoose.model('Visit', visitSchema);
 
 

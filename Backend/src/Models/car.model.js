@@ -1,17 +1,23 @@
 const mongoose = require('mongoose')
 
 const carSchema = mongoose.Schema({
-    guest_id:{
-        type:mongoose.Schema.Types.ObjectId,ref:"Guest"
+    plateNumber: {
+        type: String,
+        required: true,
+        unique: true
     },
-    plate_number:{
-        type:String,    
+    carModel: {
+        type: String,
+        required: true
     },
-    color:{
-        type:String,
+    carColor: {
+        type: String,
+        required: true
     },
-    model:{
-        type:String,
+    guest: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Guest',
+        required: true
     },
     createdAt:{
         type:Date,

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../Services/api';
@@ -9,6 +9,7 @@ const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const [authChecked, setAuthChecked] = useState(false);
 
     useEffect(() => {
         const checkAuthStatus = async () => {
@@ -18,12 +19,14 @@ const AuthProvider = ({ children }) => {
             // Skip auth check if we're on the login page
             if (location.pathname === '/login') {
                 console.log('On login page, skipping auth check');
+                setAuthChecked(true);
                 return;
             }
 
             // If we're already authenticated according to Redux state, don't check again
             if (isAuthenticated && user) {
                 console.log('Already authenticated, skipping auth check');
+                setAuthChecked(true);
                 return;
             }
 
@@ -45,11 +48,18 @@ const AuthProvider = ({ children }) => {
                 console.error('Auth check error:', error);
                 dispatch(loginFailure('Not authenticated'));
                 navigate('/login', { replace: true });
+            } finally {
+                setAuthChecked(true);
             }
         };
 
         checkAuthStatus();
     }, [dispatch, navigate, location.pathname, isAuthenticated, user]);
+
+    if (!authChecked) {
+        // Show a loading spinner or nothing while checking auth
+        return <div style={{textAlign: 'center', marginTop: '2rem'}}>Checking authentication...</div>;
+    }
 
     return children;
 };

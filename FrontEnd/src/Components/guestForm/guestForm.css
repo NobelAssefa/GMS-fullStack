@@ -5,8 +5,8 @@
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     max-width: 1200px;
     margin: 20px auto;
-    display: grid;
-    grid-template-columns: 2fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 30px;
 }
 
@@ -31,7 +31,8 @@
 }
 
 .form-content {
-    display: flex;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
     gap: 40px;
     margin-bottom: 30px;
 }
@@ -296,6 +297,7 @@
     height: fit-content;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border: 1px solid #eee;
+    margin-bottom: 20px;
 }
 
 .preview-card h3 {
@@ -355,4 +357,36 @@
     color: #999;
     font-style: italic;
     font-size: 14px;
+}
+
+.table-section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .form-content {
+        grid-template-columns: 1fr;
+    }
+
+    .preview-card {
+        position: static;
+        margin-bottom: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .guest-form-container {
+        padding: 15px;
+    }
+
+    .form-content {
+        gap: 20px;
+    }
+
+    .preview-card {
+        padding: 16px;
+    }
 }

@@ -1,63 +1,99 @@
 const AsyncHandler = require('express-async-handler')
 const Guest = require('../Models/guest.model');
+const User = require('../Models/user.model');
 
-const createGuest = AsyncHandler(async(req,res)=>{
-    const{fullName,email,phone,is_vip,has_car} = req.body;
-    const GuestExists = await Guest.findOne({email});
-    if(GuestExists){
+// Create a new guest (basic info only, no car/items)
+const createGuest = AsyncHandler(async(req, res) => {
+    const { fullName, email, phone, isVip, profileImage } = req.body;
+    const GuestExists = await Guest.findOne({ email });
+    if (GuestExists) {
         res.status(400);
-        throw new Error('This Guest is Already Registerd!')
+        throw new Error('A guest with this email is already registered!')
     }
     if (!fullName || !email || !phone) {
         res.status(400);
-        throw new Error("Please fill all required forms");
+        throw new Error("Please fill all required fields");
     }
-
+    // req.user._id should be set by auth middleware
     const guest = await Guest.create({
         fullName,
         email,
         phone,
-        is_vip,
-        has_car
-    })
-
-    res.status(201).json(guest)
+        isVip: isVip || false,
+        profileImage,
+        registeredBy: req.user._id
+    });
+    res.status(201).json(guest);
 });
 
-const getGuest = AsyncHandler (async (req,res)=>{
-    const Guests = await Guest.find();
-    res.status(200).json(Guests)
-})
+// Get all guests (basic info only)
+const getGuests = AsyncHandler(async (req, res) => {
+    const guests = await Guest.find().populate('registeredBy', 'fullName email');
+    res.status(200).json(guests);
+});
 
-const getSingleGuest = AsyncHandler (async (req,res)=>{
-
-    const guest = await Guest.findById(req.params.id);
-    if(!guest){
+// Get a single guest (basic info only)
+const getSingleGuest = AsyncHandler(async (req, res) => {
+    const guest = await Guest.findById(req.params.id).populate('registeredBy', 'fullName email');
+    if (!guest) {
         res.status(404);
-        throw new Error('guest not found!')
+        throw new Error('Guest not found!')
     }
     res.status(200).json(guest);
-    
-
-})
-
+});
 
 const updateGuest = AsyncHandler(async (req,res)=>{
-    const{fullName,phone,is_vip,has_car} = req.body;
+    const{fullName,phone,is_vip,has_car,plateNumber,carModel,carColor,items,profileImage} = req.body;
     const guestExists = await Guest.findById(req.params.id)
     if(!guestExists){
         res.status(404);
-        throw new Error('no guest found')
+        throw new Error('Guest not found!')
     }
     if (!fullName || !phone) {
         res.status(400);
-        throw new Error("Please fill all required forms");
+        throw new Error("Please fill all required fields");
+    }
+    if (has_car && (!plateNumber || !carModel || !carColor)) {
+        res.status(400);
+        throw new Error("Please provide all car details");
     }
 
     guestExists.fullName = fullName || guestExists.fullName;
     guestExists.phone = phone || guestExists.phone;
     guestExists.is_vip = is_vip || guestExists.is_vip;
     guestExists.has_car = has_car || guestExists.has_car;
+    guestExists.profileImage = profileImage || guestExists.profileImage;
+
+    if (has_car) {
+        await Car.findOneAndUpdate(
+            { guest: guestExists._id },
+            {
+                plateNumber,
+                carModel,
+                carColor,
+                guest: guestExists._id
+            },
+            { upsert: true, new: true }
+        );
+    } else {
+        await Car.findOneAndDelete({ guest: guestExists._id });
+    }
+
+    if (items) {
+        await Item.deleteMany({ guest: guestExists._id });
+        
+        if (items.length > 0) {
+            const itemPromises = items.map(item => 
+                Item.create({
+                    name: item.name || item,
+                    description: item.description || '',
+                    isChecked: item.isChecked || false,
+                    guest: guestExists._id
+                })
+            );
+            await Promise.all(itemPromises);
+        }
+    }
 
     const updatedGuest = await guestExists.save()
     res.status(201).json(updatedGuest);
@@ -68,14 +104,13 @@ const deleteGuest = AsyncHandler(async (req,res)=>{
     const guest = await Guest.findById(req.params.id)
     if(!guest){
         res.status(404);
-        throw new Error('no guest found!')
+        throw new Error('Guest not found!')
     }
    await guest.deleteOne();
-    res.status(200).json({message:"guset successfuly deleted!"})
+    res.status(200).json({message:"Guest deleted successfully"})
 
 });
 
-
 module.exports = {
-    createGuest,getGuest,getSingleGuest,updateGuest,deleteGuest
+    createGuest, getGuests, getSingleGuest, updateGuest, deleteGuest
 };

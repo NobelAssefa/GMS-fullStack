@@ -1,18 +1,19 @@
 const mongoose = require('mongoose')
+
 const guestSchema = mongoose.Schema({
     fullName: {
         type: String,
         required: true
     },
-    email:{
+    email: {
         type: String,
-        required:[true, "Please provide your email"],
+        required: [true, "Please provide your email"],
         unique: true,
         trim: true,
         match: [
             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-            "Please enter a valid emaial",
-          ],
+            "Please enter a valid email",
+        ],
     },
     phone: {
         type: String,
@@ -20,17 +21,22 @@ const guestSchema = mongoose.Schema({
     },
     is_vip: {
         type: Boolean,
+        default: false
     },
-    has_car:{
-        type:Boolean,
+    profileImage: {
+        type: String,
     },
-    createdAt:{
-        type:Date,
-        default:Date.now
+    registeredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
-
-},{
-    timestamps:true
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model("Guest", guestSchema)

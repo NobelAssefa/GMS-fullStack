@@ -1,33 +1,24 @@
 const mongoose = require('mongoose')
 
 const itemSchema = mongoose.Schema({
-    item_name:{
-        type:String,
-        required:true
-    },
-    visit_id:{
-        type:mongoose.Schema.Types.ObjectId,ref:"Visit"
-    },
-    serial_number:{
+    name: {
         type: String,
-        required:[true, "Please provide item serial_number"],
-        unique: true,
-        trim: true,
-       
+        required: true
     },
-    quantity:{
-        type:Number,
-        required:true
+    guest: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Guest',
+        required: true
     },
-    description:{
-        type:String,
+    description: {
+        type: String
     },
-    createdAt:{
-        type:Date,
-        default:Date.now
+    isChecked: {
+        type: Boolean,
+        default: false
     }
-},{
-    timestamps:true
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model("Item", itemSchema);

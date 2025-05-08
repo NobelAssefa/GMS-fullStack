@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import './visitRequest.css';
 import VisitRequestForm from '../../Components/visitRequestForm/VisitRequestForm';
 import { Alert, Snackbar } from '@mui/material';
-import axios from 'axios';
+import { createVisitRequest } from '../../Services/visitService';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 export default function VisitRequestPage() {
     const [feedback, setFeedback] = useState({
@@ -12,27 +13,25 @@ export default function VisitRequestPage() {
         severity: 'success'
     });
     const navigate = useNavigate();
+    const { user } = useSelector((state) => state.auth);
 
     const handleVisitSubmit = async (formData) => {
         try {
-            const response = await axios.post('/api/visits/request', formData);
-            
+            const payload = { ...formData, user_id: user?._id };
+            await createVisitRequest(payload);
             setFeedback({
                 open: true,
                 message: 'Visit request submitted successfully!',
                 severity: 'success'
             });
-
-            // Redirect to visits list after successful submission
             setTimeout(() => {
                 navigate('/visits');
             }, 2000);
-
         } catch (error) {
-            console.error('Visit request error:', error);
+            console.error('Visit request error:', error, error.response?.data);
             setFeedback({
                 open: true,
-                message: error.response?.data?.message || 'Failed to submit visit request. Please try again.',
+                message: error.response?.data?.message || error.message || 'Failed to submit visit request. Please try again.',
                 severity: 'error'
             });
         }
