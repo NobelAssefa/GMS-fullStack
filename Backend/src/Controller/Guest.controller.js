@@ -4,7 +4,7 @@ const User = require('../Models/user.model');
 
 // Create a new guest (basic info only, no car/items)
 const createGuest = AsyncHandler(async(req, res) => {
-    const { fullName, email, phone, isVip, profileImage } = req.body;
+    const { fullName, email, phone, is_vip, profileImage } = req.body;
     const GuestExists = await Guest.findOne({ email });
     if (GuestExists) {
         res.status(400);
@@ -19,7 +19,7 @@ const createGuest = AsyncHandler(async(req, res) => {
         fullName,
         email,
         phone,
-        isVip: isVip || false,
+        is_vip: is_vip || false,
         profileImage,
         registeredBy: req.user._id
     });
@@ -29,6 +29,7 @@ const createGuest = AsyncHandler(async(req, res) => {
 // Get all guests (basic info only)
 const getGuests = AsyncHandler(async (req, res) => {
     const guests = await Guest.find().populate('registeredBy', 'fullName email');
+    console.log('Sending guests data:', guests); // Debug log
     res.status(200).json(guests);
 });
 
@@ -60,7 +61,7 @@ const updateGuest = AsyncHandler(async (req,res)=>{
 
     guestExists.fullName = fullName || guestExists.fullName;
     guestExists.phone = phone || guestExists.phone;
-    guestExists.is_vip = is_vip || guestExists.is_vip;
+    guestExists.is_vip = is_vip !== undefined ? is_vip : guestExists.is_vip;
     guestExists.has_car = has_car || guestExists.has_car;
     guestExists.profileImage = profileImage || guestExists.profileImage;
 

@@ -18,15 +18,13 @@ export default function VisitRequestPage() {
     const handleVisitSubmit = async (formData) => {
         try {
             const payload = { ...formData, user_id: user?._id };
-            await createVisitRequest(payload);
+            const response = await createVisitRequest(payload);
             setFeedback({
                 open: true,
                 message: 'Visit request submitted successfully!',
                 severity: 'success'
             });
-            setTimeout(() => {
-                navigate('/visits');
-            }, 2000);
+            return response; // Return the response to the form component
         } catch (error) {
             console.error('Visit request error:', error, error.response?.data);
             setFeedback({
@@ -34,6 +32,7 @@ export default function VisitRequestPage() {
                 message: error.response?.data?.message || error.message || 'Failed to submit visit request. Please try again.',
                 severity: 'error'
             });
+            throw error; // Re-throw the error to be handled by the form
         }
     };
 
@@ -52,17 +51,16 @@ export default function VisitRequestPage() {
             </div>
 
             <VisitRequestForm onSubmit={handleVisitSubmit} />
-
-            <Snackbar
-                open={feedback.open}
-                autoHideDuration={6000}
+            
+            <Snackbar 
+                open={feedback.open} 
+                autoHideDuration={6000} 
                 onClose={handleCloseFeedback}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
                 <Alert 
                     onClose={handleCloseFeedback} 
                     severity={feedback.severity}
-                    variant="filled"
                     sx={{ width: '100%' }}
                 >
                     {feedback.message}

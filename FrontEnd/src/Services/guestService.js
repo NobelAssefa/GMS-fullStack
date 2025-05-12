@@ -21,6 +21,7 @@ const getAllGuests = async () => {
         const response = await axios.get(`${API_URL}/getguests`,{
             withCredentials: true
         });
+        console.log('API Response:', response.data); // Debug log
         return response.data;
     } catch (error) {
         if (error.response?.data?.message) {

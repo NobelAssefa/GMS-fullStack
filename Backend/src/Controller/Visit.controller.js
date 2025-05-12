@@ -33,13 +33,11 @@ const createVisit = AsyncHandler(async (req, res) => {
         isApproved = true; // Auto approve for these roles
     }
 
-
-    let unique_code = generateUniqueCode;
-
-    // Ensure it's unique in the database
+    // Generate unique code and ensure it's unique in the database
+    let unique_code = generateUniqueCode();
     let existingVisit = await Visit.findOne({ unique_code });
     while (existingVisit) {
-        unique_code = generateUniqueCode;
+        unique_code = generateUniqueCode();
         existingVisit = await Visit.findOne({ unique_code });
     }
 
@@ -47,14 +45,15 @@ const createVisit = AsyncHandler(async (req, res) => {
         guest_id,
         user_id,
         department_id,
-        visit_date, duration,
+        visit_date,
+        duration,
         is_approved: isApproved,
         checked_in,
-        checked_out
-    })
-    res.status(201).json(visit)
-})
-
+        checked_out,
+        unique_code
+    });
+    res.status(201).json(visit);
+});
 
 const getVisits = AsyncHandler(async (req, res) => {
     const visits = await Visit.find()
@@ -107,8 +106,6 @@ const checkInVisit = AsyncHandler(async (req, res) => {
     await visit.save();
     res.status(200).json({ message: 'Guest checked in successfully' });
 });
-
-
 
 const checkOutVisit = AsyncHandler(async (req, res) => {
     const { unique_code } = req.params
