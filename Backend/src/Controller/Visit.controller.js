@@ -57,9 +57,22 @@ const createVisit = AsyncHandler(async (req, res) => {
 
 const getVisits = AsyncHandler(async (req, res) => {
     const visits = await Visit.find()
-        .populate('guest_id', 'fullname phone')
+        .populate('guest_id', 'fullName phone')
         .populate('user_id', 'fullname email')
-        .populate('department_id', 'department_name');
+        .populate('department_id', 'departmentName')
+        .populate('car', 'car_name')
+        .populate('unique_code');
+        
+    res.status(200).json(visits);
+});
+const getApprovedVisits = AsyncHandler(async (req, res) => {
+    const visits = await Visit.find({ is_approved: true })
+        .populate('guest_id', 'fullName phone')
+        .populate('user_id', 'fullname email')
+        .populate('department_id', 'departmentName')
+        .populate('car', 'car_name')
+        .populate('unique_code');
+        
     res.status(200).json(visits);
 });
 
@@ -89,22 +102,51 @@ const approveVisit = AsyncHandler(async (req, res) => {
     res.status(200).json(updatedVisit);
 });
 
-const checkInVisit = AsyncHandler(async (req, res) => {
-    const { unique_code } = req.params
-    const visit = await Visit.findOne({ unique_code: unique_code })
+
+const rejectVisit = AsyncHandler(async (req, res) => {
+    const visit = await Visit.findById(req.params.id);
 
     if (!visit) {
         res.status(404);
         throw new Error('Visit not found');
     }
+    if(visit.is_approved === false){
+        visit.is_approved = false;
+    }
+    else{
+        visit.is_approved = false;
+    }
+  
+    const updatedVisit = await visit.save();
+    res.status(200).json(updatedVisit);
+});
+
+const checkInVisit = AsyncHandler(async (req, res) => {
+    const { unique_code } = req.params;
+    const visit = await Visit.findOne({ unique_code })
+        .populate('guest_id', 'fullname phone')
+        .populate('user_id', 'fullname email')
+        .populate('department_id', 'department_name')
+        .populate('car', 'car_name');
+
+    if (!visit) {
+        res.status(404);
+        throw new Error('Visit not found');
+    }
+
     if (!visit.is_approved) {
         res.status(400);
-        throw new Error('Visit is not approved yet');
+        throw new Error('Cannot check in an unapproved visit');
+    }
+
+    if (visit.checked_in) {
+        res.status(400);
+        throw new Error('Guest is already checked in');
     }
 
     visit.checked_in = true;
     await visit.save();
-    res.status(200).json({ message: 'Guest checked in successfully' });
+    res.status(200).json({ message: 'Guest checked in successfully', visit });
 });
 
 const checkOutVisit = AsyncHandler(async (req, res) => {
@@ -134,6 +176,8 @@ module.exports = {
     getVisits,
     getVisitsByUserId,
     approveVisit,
+    getApprovedVisits,
+    rejectVisit,
     checkInVisit,
     checkOutVisit
 }

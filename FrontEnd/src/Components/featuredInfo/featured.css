@@ -15,13 +15,13 @@
     transition: all 0.3s ease;
     min-width: 250px;
 }
-.featuredItem.revenue {
+.featuredItem.total {
     background-color: #0D623F;
 }
-.featuredItem.sales {
+.featuredItem.pending {
     background-color: #FA5046;
 }
-.featuredItem.cost {
+.featuredItem.active {
     background-color: #204B98;
 }
 .featuredItem:hover {

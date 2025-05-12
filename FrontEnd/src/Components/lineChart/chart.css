@@ -1,11 +1,18 @@
-.chart{
-    margin: 20px;
-    padding: 20px;
-    box-shadow: -1px 4px 14px -1px rgba(0,0,0,0.23);
-    -webkit-box-shadow: -1px 4px 14px -1px rgba(0,0,0,0.23);
-    -moz-box-shadow: -1px 4px 14px -1px rgba(0,0,0,0.23);
-
+.chart {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 28px 24px 28px;
+    margin-bottom: 32px;
+    min-width: 340px;
 }
-.chartTitle{
-    margin-bottom: 20px;
+
+.chartTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #222;
+    letter-spacing: 0.5px;
+    border-bottom: 1.5px solid #f0f0f0;
+    padding-bottom: 8px;
 }

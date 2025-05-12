@@ -1,14 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, IconButton, Tooltip } from '@mui/material';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Typography,
+    Box,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    IconButton,
+    Tooltip,
+    Chip,
+    CircularProgress
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import axios from 'axios';
+import visitApprovalService from '../../Services/visitApprovalService';
 
 export default function UserVisitRequestsTable() {
     const { user } = useSelector((state) => state.auth);
     const [visits, setVisits] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedVisit, setSelectedVisit] = useState(null);
+    const [showRejectDialog, setShowRejectDialog] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
 
     useEffect(() => {
         const fetchVisits = async () => {
@@ -46,17 +72,28 @@ export default function UserVisitRequestsTable() {
     const handleDownload = (visit) => {
         const visitDetails = {
             'Visit Code': visit.unique_code,
-            'Guest': visit.guest_id ? `${visit.guest_id.fullName} (${visit.guest_id.email})` : 'N/A',
-            'Department': visit.department_id?.departmentName || 'N/A',
+            'Guest': visit.guest ? `${visit.guest.fullName} (${visit.guest.email})` : 'N/A',
+            'Department': visit.department?.departmentName || 'N/A',
             'Visit Date': visit.visit_date ? new Date(visit.visit_date).toLocaleDateString() : 'N/A',
-            'Duration': visit.duration ? (typeof visit.duration === 'string' ? visit.duration : (Array.isArray(visit.duration) ? visit.duration.map(d => new Date(d).toLocaleDateString()).join(' - ') : '-')) : 'N/A',
-            'Status': visit.is_approved ? 'Approved' : 'Pending',
-            'Check-in Status': visit.checked_in ? 'Checked In' : 'Not Checked In',
-            'Check-out Status': visit.checked_out ? 'Checked Out' : 'Not Checked Out'
+            'Status': visit.is_approved ? 'Approved' : visit.is_rejected ? 'Rejected' : 'Pending',
+            'Car Details': visit.car ? {
+                'Plate Number': visit.car.plateNumber,
+                'Model': visit.car.carModel,
+                'Color': visit.car.carColor
+            } : 'No car registered',
+            'Items': visit.items?.length > 0 ? visit.items.join(', ') : 'No items',
+            'Remarks': visit.remark || 'No remarks'
         };
 
         const content = Object.entries(visitDetails)
-            .map(([key, value]) => `${key}: ${value}`)
+            .map(([key, value]) => {
+                if (typeof value === 'object') {
+                    return `${key}:\n${Object.entries(value)
+                        .map(([k, v]) => `  ${k}: ${v}`)
+                        .join('\n')}`;
+                }
+                return `${key}: ${value}`;
+            })
             .join('\n\n');
 
         const blob = new Blob([content], { type: 'text/plain' });
@@ -70,52 +107,163 @@ export default function UserVisitRequestsTable() {
         document.body.removeChild(a);
     };
 
+    const handleApprove = async (visit) => {
+        try {
+            setLoading(true);
+            await visitApprovalService.approveVisit(visit._id);
+            if (onVisitUpdate) {
+                onVisitUpdate();
+            }
+        } catch (error) {
+            console.error('Error approving visit:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleReject = async () => {
+        if (!selectedVisit || !rejectReason.trim()) return;
+
+        try {
+            setLoading(true);
+            await visitApprovalService.rejectVisit(selectedVisit._id, rejectReason);
+            setShowRejectDialog(false);
+            setRejectReason('');
+            if (onVisitUpdate) {
+                onVisitUpdate();
+            }
+        } catch (error) {
+            console.error('Error rejecting visit:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getStatusChip = (visit) => {
+        if (visit.is_approved) {
+            return <Chip label="Approved" color="success" size="small" />;
+        } else if (visit.is_rejected) {
+            return <Chip label="Rejected" color="error" size="small" />;
+        }
+        return <Chip label="Pending" color="warning" size="small" />;
+    };
+
     if (loading) return <CircularProgress sx={{ display: 'block', margin: '20px auto' }} />;
     if (error) return <Typography color="error">{error}</Typography>;
     if (!visits.length) return <Typography>No visit requests found.</Typography>;
 
     return (
-        <TableContainer component={Paper}>
-            <Typography variant="h6" sx={{ m: 2 }}>My Visit Requests</Typography>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Guest</TableCell>
-                        <TableCell>Department</TableCell>
-                        <TableCell>Visit Date</TableCell>
-                        <TableCell>Duration</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Actions</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {visits.map((visit) => (
-                        <TableRow key={visit._id}>
-                            <TableCell>{visit.guest_id?.fullName || '-'}</TableCell>
-                            <TableCell>{visit.department_id?.departmentName || '-'}</TableCell>
-                            <TableCell>{visit.visit_date ? new Date(visit.visit_date).toLocaleDateString() : '-'}</TableCell>
-                            <TableCell>{visit.duration ? (typeof visit.duration === 'string' ? visit.duration : (Array.isArray(visit.duration) ? visit.duration.map(d => new Date(d).toLocaleDateString()).join(' - ') : '-')) : '-'}</TableCell>
-                            <TableCell>{visit.is_approved ? 'Approved' : 'Pending'}</TableCell>
-                            <TableCell>
-                                <Tooltip title="Download Visit Details">
-                                    <IconButton 
-                                        onClick={() => handleDownload(visit)}
-                                        size="small"
-                                        sx={{ 
-                                            color: '#1F2C40',
-                                            '&:hover': {
-                                                backgroundColor: 'rgba(31, 44, 64, 0.1)'
-                                            }
-                                        }}
-                                    >
-                                        <DownloadIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            </TableCell>
+        <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#1F2C40' }}>
+                Your Visit Requests
+            </Typography>
+            <TableContainer component={Paper} sx={{ boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                <Table>
+                    <TableHead>
+                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                            <TableCell>Visit Code</TableCell>
+                            <TableCell>Guest</TableCell>
+                            <TableCell>Department</TableCell>
+                            <TableCell>Visit Date</TableCell>
+                            <TableCell>Status</TableCell>
+                            <TableCell>Actions</TableCell>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                        {visits.map((visit) => (
+                            <TableRow key={visit._id}>
+                                <TableCell>{visit.unique_code}</TableCell>
+                                <TableCell>
+                                    {visit.guest ? `${visit.guest.fullName} (${visit.guest.email})` : 'N/A'}
+                                </TableCell>
+                                <TableCell>{visit.department?.departmentName || 'N/A'}</TableCell>
+                                <TableCell>
+                                    {visit.visit_date ? new Date(visit.visit_date).toLocaleDateString() : 'N/A'}
+                                </TableCell>
+                                <TableCell>{getStatusChip(visit)}</TableCell>
+                                <TableCell>
+                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                        <Tooltip title="Download Details">
+                                            <IconButton
+                                                onClick={() => handleDownload(visit)}
+                                                size="small"
+                                                sx={{ color: '#1F2C40' }}
+                                            >
+                                                <DownloadIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        {!visit.is_approved && !visit.is_rejected && (
+                                            <>
+                                                <Tooltip title="Approve Visit">
+                                                    <IconButton
+                                                        onClick={() => handleApprove(visit)}
+                                                        size="small"
+                                                        color="success"
+                                                        disabled={loading}
+                                                    >
+                                                        <CheckCircleIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Reject Visit">
+                                                    <IconButton
+                                                        onClick={() => {
+                                                            setSelectedVisit(visit);
+                                                            setShowRejectDialog(true);
+                                                        }}
+                                                        size="small"
+                                                        color="error"
+                                                        disabled={loading}
+                                                    >
+                                                        <CancelIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </>
+                                        )}
+                                    </Box>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            <Dialog 
+                open={showRejectDialog} 
+                onClose={() => setShowRejectDialog(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Reject Visit Request</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Rejection Reason"
+                        fullWidth
+                        multiline
+                        rows={4}
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        variant="outlined"
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button 
+                        onClick={() => setShowRejectDialog(false)}
+                        sx={{ color: '#1F2C40' }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleReject}
+                        variant="contained"
+                        color="error"
+                        disabled={!rejectReason.trim() || loading}
+                    >
+                        Reject
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Box>
     );
 } 

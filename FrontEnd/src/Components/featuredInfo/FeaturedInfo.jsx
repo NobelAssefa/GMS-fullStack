@@ -1,42 +1,70 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import "./featured.css"
 import ArrowDownwardOutlinedIcon from '@mui/icons-material/ArrowDownwardOutlined';
 import ArrowUpwardOutlinedIcon from '@mui/icons-material/ArrowUpwardOutlined';
+import axios from 'axios';
+
 export default function FeaturedInfo() {
+  const [stats, setStats] = useState({
+    totalVisits: 0,
+    pendingApprovals: 0,
+    activeVisits: 0
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await axios.get('/api/visit/getvisits', { withCredentials: true });
+        const visits = response.data;
+        
+        const totalVisits = visits.length;
+        const pendingApprovals = visits.filter(v => !v.is_approved).length;
+        const activeVisits = visits.filter(v => v.is_approved && v.checked_in && !v.checked_out).length;
+        
+        setStats({
+          totalVisits,
+          pendingApprovals,
+          activeVisits
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <div className="featured">
-        <div className="featuredItem revenue">
-            <span className="featuredTitle">Revenue</span>
+        <div className="featuredItem total">
+            <span className="featuredTitle">Total Visits</span>
             <div className="featuredMoneyContainer">
-                <span className="featureMoney">$2,415</span>
+                <span className="featureMoney">{stats.totalVisits}</span>
                 <span className="featureMoneyRate">
-                    -11.4 
-                    <ArrowDownwardOutlinedIcon className="featuredName negative"/>
-                </span>
-            </div>
-            <div className="featureSub">Compared to Last year</div>
-        </div>
-        <div className="featuredItem sales">
-            <span className="featuredTitle">Sales</span>
-            <div className="featuredMoneyContainer">
-                <span className="featureMoney">$2,415</span>
-                <span className="featureMoneyRate">
-                    -1.4 
-                    <ArrowDownwardOutlinedIcon className="featuredName negative"/>
-                </span>
-            </div>
-            <div className="featureSub">Compared to Last year</div>
-        </div>
-        <div className="featuredItem cost">
-            <span className="featuredTitle">Cost</span>
-            <div className="featuredMoneyContainer">
-                <span className="featureMoney">$2,415</span>
-                <span className="featureMoneyRate">
-                    +4.4 
                     <ArrowUpwardOutlinedIcon className="featuredName"/>
                 </span>
             </div>
-            <div className="featureSub">Compared to Last year</div>
+            <div className="featureSub">All time visits</div>
+        </div>
+        <div className="featuredItem pending">
+            <span className="featuredTitle">Pending Approvals</span>
+            <div className="featuredMoneyContainer">
+                <span className="featureMoney">{stats.pendingApprovals}</span>
+                <span className="featureMoneyRate">
+                    <ArrowDownwardOutlinedIcon className="featuredName negative"/>
+                </span>
+            </div>
+            <div className="featureSub">Awaiting approval</div>
+        </div>
+        <div className="featuredItem active">
+            <span className="featuredTitle">Active Visits</span>
+            <div className="featuredMoneyContainer">
+                <span className="featureMoney">{stats.activeVisits}</span>
+                <span className="featureMoneyRate">
+                    <ArrowUpwardOutlinedIcon className="featuredName"/>
+                </span>
+            </div>
+            <div className="featureSub">Currently checked in</div>
         </div>
     </div>
   )

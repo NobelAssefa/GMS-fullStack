@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import userService from '../../Services/userService';
 import './NewUser.css';
+import api, { authService } from '../../Services/api';
 
 const NewUser = () => {
     const navigate = useNavigate();
@@ -99,7 +100,7 @@ const NewUser = () => {
         try {
             // Remove confirmPassword before sending to API
             const { confirmPassword, ...userData } = formData;
-            await userService.createUser(userData);
+            await authService.register(userData);
             showSnackbar('User created successfully');
             navigate('/user');
         } catch (error) {

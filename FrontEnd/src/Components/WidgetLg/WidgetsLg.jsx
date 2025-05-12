@@ -1,10 +1,32 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import "./widgetsLg.css"
 import CheckInIcon from '@mui/icons-material/Login';
 import CheckOutIcon from '@mui/icons-material/Logout';
 import PendingIcon from '@mui/icons-material/Pending';
+import axios from 'axios';
+import { format } from 'date-fns';
 
 export default function WidgetsLg() {
+  const [recentVisits, setRecentVisits] = useState([]);
+
+  useEffect(() => {
+    const fetchRecentVisits = async () => {
+      try {
+        const response = await axios.get('/api/visit/getvisits', { withCredentials: true });
+        const visits = response.data
+          .sort((a, b) => new Date(b.visit_date) - new Date(a.visit_date))
+          .slice(0, 5);
+        setRecentVisits(visits);
+        console.log("visits", visits);
+        
+      } catch (error) {
+        console.error('Error fetching recent visits:', error);
+      }
+    };
+
+    fetchRecentVisits();
+  }, []);
+
   const Button = ({type}) => {
     return (
       <button className={"widgetLgbutton" + " " + type}>
@@ -16,61 +38,45 @@ export default function WidgetsLg() {
     );
   };
 
+  const getVisitStatus = (visit) => {
+    if (!visit.is_approved) return 'Pending';
+    if (visit.checked_out) return 'Checked Out';
+    if (visit.checked_in) return 'Checked In';
+    return 'Pending';
+  };
+
   return (
     <div className='widgetLg'>
-        <span className="widgetLgTitle">Guest Status</span>
+        <span className="widgetLgTitle">Recent Visits</span>
         <table className="widgetLgtable">
           <tr className="widgetLgtr">
             <th className="widgetLgth">Guest Name</th>
-            <th className="widgetLgth">Check In</th>
-            <th className="widgetLgth">Check Out</th>
+            <th className="widgetLgth">Visit Date</th>
+            <th className="widgetLgth">Department</th>
             <th className="widgetLgth">Status</th>
           </tr>
-          <tr className="widgetLgtr">
-            <td className="widgetLgUser">
-              <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400" alt="" className="widgetLguserimg" />
-              <span className="widgetLgName">John Smith</span>
-            </td>
-            <td className="widgetLgdate">10:00 AM</td>
-            <td className="widgetLgdate">-</td>
-            <td className="widgetLgStatus">
-              <Button type="Checked In" />
-            </td>
-          </tr>
-          <tr className="widgetLgtr">
-            <td className="widgetLgUser">
-              <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400" alt="" className="widgetLguserimg" />
-              <span className="widgetLgName">Sarah Johnson</span>
-            </td>
-            <td className="widgetLgdate">09:30 AM</td>
-            <td className="widgetLgdate">11:30 AM</td>
-            <td className="widgetLgStatus">
-              <Button type="Checked Out" />
-            </td>
-          </tr>
-          <tr className="widgetLgtr">
-            <td className="widgetLgUser">
-              <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400" alt="" className="widgetLguserimg" />
-              <span className="widgetLgName">Michael Brown</span>
-            </td>
-            <td className="widgetLgdate">-</td>
-            <td className="widgetLgdate">-</td>
-            <td className="widgetLgStatus">
-              <Button type="Pending" />
-            </td>
-          </tr>
-          <tr className="widgetLgtr">
-            <td className="widgetLgUser">
-              <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400" alt="" className="widgetLguserimg" />
-              <span className="widgetLgName">Emily Davis</span>
-            </td>
-            <td className="widgetLgdate">11:00 AM</td>
-            <td className="widgetLgdate">-</td>
-            <td className="widgetLgStatus">
-              <Button type="Checked In" />
-            </td>
-          </tr>
+          {recentVisits.map((visit) => (
+            <tr key={visit._id} className="widgetLgtr">
+              <td className="widgetLgUser">
+                <img 
+                  src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400" 
+                  alt="" 
+                  className="widgetLguserimg" 
+                />
+                <span className="widgetLgName">{visit.guest_id?.fullName}</span>
+              </td>
+              <td className="widgetLgdate">
+                {format(new Date(visit.visit_date), 'MMM dd, yyyy')}
+              </td>
+              <td className="widgetLgdate">
+                {visit.department_id?.departmentName}
+              </td>
+              <td className="widgetLgStatus">
+                <Button type={getVisitStatus(visit)} />
+              </td>
+            </tr>
+          ))}
         </table>
     </div>
-  )
+  );
 }

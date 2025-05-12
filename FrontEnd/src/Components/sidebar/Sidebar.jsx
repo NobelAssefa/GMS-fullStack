@@ -28,7 +28,7 @@ export default function Sidebar({ isCollapsed }) {
   const [activeItem, setActiveItem] = useState("");
   const { user } = useSelector((state) => state.auth);
   const isAdmin = user?.is_Admin;
-  const role = user?.role_id?.roleName;
+  const role = user?.role?.roleName;
 
   useEffect(() => {
     // Set active item based on current path
@@ -68,16 +68,16 @@ export default function Sidebar({ isCollapsed }) {
                 Visit Request
               </li>
             </Link>
-            <Link to="/visit/approval" className="link" onClick={() => handleItemClick("/visit/approval")}>
+           { role === "SECRATORY" && <Link to="/visit/approval" className="link" onClick={() => handleItemClick("/visit/approval")}>
               <li className={`sidebarListItem ${activeItem === "/visit/approval" ? "active" : ""}`}>
                 <DoneAllIcon className="sideBarIcons" />
                 Visit Approvals	 
               </li>
-            </Link>
+            </Link>}
             {role === "SECURITY" && <Link to="/checkin" className="link" onClick={() => handleItemClick("/checkin")}>
               <li className={`sidebarListItem ${activeItem === "/checkin" ? "active" : ""}`}>
                 <OpenInNewIcon className="sideBarIcons" />
-                CheckIn Panel	 
+                CheckIn/Out Panel	 
               </li>
             </Link>}
             {isAdmin && (
@@ -114,7 +114,7 @@ export default function Sidebar({ isCollapsed }) {
             {!isCollapsed && (
               <div className="userInfo">
                 <span className="userName">{user?.fullName || "User"}</span>
-                <span className="userRole">{isAdmin ? "Administrator" : "User"}</span>
+                <span className="userRole">{isAdmin ? "Administrator" : user.role.roleName  }</span>
               </div>
             )}
           </div>

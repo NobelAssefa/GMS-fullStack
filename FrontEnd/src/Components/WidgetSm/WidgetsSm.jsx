@@ -1,72 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./widgetsSm.css";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import UserModal from "../UserModal/UserModal";
+import axios from 'axios';
 
 export default function WidgetsSm() {
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedGuest, setSelectedGuest] = useState(null);
+  const [recentGuests, setRecentGuests] = useState([]);
 
-  const handleViewUser = (user) => {
-    setSelectedUser(user);
+  useEffect(() => {
+    const fetchRecentGuests = async () => {
+      try {
+        const response = await axios.get('/api/guest/getguests', { withCredentials: true });
+        const guests = response.data
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 5);
+        setRecentGuests(guests);
+      } catch (error) {
+        console.error('Error fetching recent guests:', error);
+      }
+    };
+
+    fetchRecentGuests();
+  }, []);
+
+  const handleViewGuest = (guest) => {
+    setSelectedGuest(guest);
   };
 
   const handleCloseModal = () => {
-    setSelectedUser(null);
+    setSelectedGuest(null);
   };
-
-  const recentUsers = [
-    {
-      id: 1,
-      username: "Dr. Upasana",
-      role: "Hospital Staff",
-      status: "Active",
-      email: "upasana@example.com",
-      lastActive: "2 hours ago",
-    },
-    {
-      id: 2,
-      username: "John Mahoney",
-      role: "Security",
-      status: "Active",
-      email: "john@example.com",
-      lastActive: "1 hour ago",
-    },
-    {
-      id: 3,
-      username: "Sarah Johnson",
-      role: "Admin",
-      status: "Active",
-      email: "sarah@example.com",
-      lastActive: "30 minutes ago",
-    },
-    {
-      id: 4,
-      username: "Mike Wilson",
-      role: "Hospital Staff",
-      status: "Active",
-      email: "mike@example.com",
-      lastActive: "15 minutes ago",
-    },
-  ];
 
   return (
     <div className="widgetSm">
-      <span className="widgetSmTitle">Recently Registered Users</span>
+      <span className="widgetSmTitle">Recently Registered Guests</span>
       <ul className="widgetSmList">
-        {recentUsers.map((user) => (
-          <li key={user.id} className="widgetSmItem">
+        {recentGuests.map((guest) => (
+          <li key={guest._id} className="widgetSmItem">
             <img
               src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=400"
               alt="profile Photo"
               className="widgetSmImg"
             />
             <div className="widgetSmUser">
-              <span className="widgetSmUsername">{user.username}</span>
-              <span className="widgetSmJobcatagory">{user.role}</span>
+              <span className="widgetSmUsername">{guest.fullName}</span>
+              <span className="widgetSmJobcatagory">{guest.phone}</span>
             </div>
-            <button
+            <button 
               className="widgetSmbutton"
-              onClick={() => handleViewUser(user)}
+              onClick={() => handleViewGuest(guest)}
             >
               <PersonAddIcon className="widgetsmIcon" />
               View
@@ -74,8 +57,10 @@ export default function WidgetsSm() {
           </li>
         ))}
       </ul>
-      {selectedUser && (
-        <UserModal user={selectedUser} onClose={handleCloseModal} />
+      {selectedGuest && (
+        <div className="in-widget-modal">
+          <UserModal user={selectedGuest} onClose={() => setSelectedGuest(null)} inWidget />
+        </div>
       )}
     </div>
   );

@@ -18,7 +18,9 @@ const authMiddleware = AsyncHandler(
             const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
             console.log('Token verified:', decoded); // Debug: Log verification result
             
-            req.user = await User.findById(decoded.id).select("-password")
+            req.user = await User.findById(decoded.id)
+                .populate('role_id', 'roleName')
+                .select("-password")
             if (!req.user) {
                 console.log('User not found for ID:', decoded.id); // Debug: Log when user not found
                 res.status(401)
@@ -37,13 +39,14 @@ const authMiddleware = AsyncHandler(
 
 const authorize = (...roles) => {
     return (req, res, next) => {
-      if (!roles.includes(req.user.role)) {
-        res.status(403);
-        throw new Error(`User role '${req.user.role}' is not authorized to access this route`);
-      }
-      next();
+        console.log('User role:', req.user.role_id?.roleName); // Debug: Log user role
+        if (!req.user.role_id || !roles.includes(req.user.role_id.roleName)) {
+            res.status(403);
+            throw new Error(`User role '${req.user.role_id?.roleName || 'undefined'}' is not authorized to access this route`);
+        }
+        next();
     };
-  };
+};
 
 const is_Admin = AsyncHandler(async (req, res, next) => {
     console.log("Entered is_Admin function");

@@ -14,13 +14,15 @@ import {
     TableHead,
     TableRow,
     IconButton,
-    Alert
+    Alert,
+    CircularProgress
 } from '@mui/material';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { format } from 'date-fns';
+import checkInService from '../../Services/checkInService';
 
 // Sample visit data for demonstration
 const sampleVisits = [
@@ -104,7 +106,7 @@ export default function CheckInPanel() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    const handleSearch = (e) => {
+    const handleSearch = async (e) => {
         e.preventDefault();
         if (!searchQuery.trim()) return;
 
@@ -113,29 +115,25 @@ export default function CheckInPanel() {
         setSuccess('');
 
         try {
-            // Find visit by code or guest name
-            const foundVisit = sampleVisits.find(v => 
-                v.code.toLowerCase() === searchQuery.toLowerCase() || 
-                v.guest.fullName.toLowerCase().includes(searchQuery.toLowerCase())
-            );
+            const foundVisit = await checkInService.searchVisit(searchQuery);
             
             if (foundVisit) {
-                setVisit(foundVisit);
-                setError('');
-            } else {
-                setError('No visit found with the provided ID or guest name');
-                // Clear error message after 3 seconds
-                setTimeout(() => {
+                if (!foundVisit.is_approved) {
+                    setError('This visit has not been approved yet');
+                    setTimeout(() => setError(''), 3000);
+                    setVisit(null);
+                } else {
+                    setVisit(foundVisit);
                     setError('');
-                }, 3000);
+                }
+            } else {
+                setError('No approved visit found with the provided ID or guest name');
+                setTimeout(() => setError(''), 3000);
                 setVisit(null);
             }
         } catch (error) {
-            setError('Error searching for visit');
-            // Clear error message after 3 seconds
-            setTimeout(() => {
-                setError('');
-            }, 3000);
+            setError(error.response?.data?.message || 'Error searching for visit');
+            setTimeout(() => setError(''), 3000);
             setVisit(null);
         } finally {
             setLoading(false);
@@ -148,50 +146,40 @@ export default function CheckInPanel() {
     };
 
     const handleCheckIn = async () => {
+        if (!visit?.unique_code) return;
+        
         setLoading(true);
         try {
-            // Simulating API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await checkInService.checkIn(visit.unique_code);
             setVisit(prev => ({
                 ...prev,
-                checkedIn: new Date().toISOString()
+                checked_in: true
             }));
             setSuccess('Guest checked in successfully');
-            // Clear success message after 3 seconds
-            setTimeout(() => {
-                setSuccess('');
-            }, 3000);
+            setTimeout(() => setSuccess(''), 3000);
         } catch (error) {
-            setError('Failed to check in guest');
-            // Clear error message after 3 seconds
-            setTimeout(() => {
-                setError('');
-            }, 3000);
+            setError(error.response?.data?.message || 'Failed to check in guest');
+            setTimeout(() => setError(''), 3000);
         } finally {
             setLoading(false);
         }
     };
 
     const handleCheckOut = async () => {
+        if (!visit?.unique_code) return;
+        
         setLoading(true);
         try {
-            // Simulating API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await checkInService.checkOut(visit.unique_code);
             setVisit(prev => ({
                 ...prev,
-                checkedOut: new Date().toISOString()
+                checked_out: true
             }));
             setSuccess('Guest checked out successfully');
-            // Clear success message after 3 seconds
-            setTimeout(() => {
-                setSuccess('');
-            }, 3000);
+            setTimeout(() => setSuccess(''), 3000);
         } catch (error) {
-            setError('Failed to check out guest');
-            // Clear error message after 3 seconds
-            setTimeout(() => {
-                setError('');
-            }, 3000);
+            setError(error.response?.data?.message || 'Failed to check out guest');
+            setTimeout(() => setError(''), 3000);
         } finally {
             setLoading(false);
         }
@@ -222,7 +210,7 @@ export default function CheckInPanel() {
                         />
                     </div>
                     <button type="submit" className="search-button" disabled={loading || !searchQuery.trim()}>
-                        <SearchIcon sx={{ fontSize: 20 }} /> 
+                        {loading ? <CircularProgress size={20} color="inherit" /> : <SearchIcon sx={{ fontSize: 20 }} />}
                     </button>
                     <button 
                         type="button" 
@@ -236,13 +224,13 @@ export default function CheckInPanel() {
                 </form>
             </div>
 
-            {visit && visit.status === 'approved' && (
+            {visit && visit.is_approved && (
                 <Paper className="visit-details">
                     <div className="section-header">
                         <Typography variant="h6">Visit Details</Typography>
                         <Chip
-                            label={visit.checkedOut ? 'Checked Out' : (visit.checkedIn ? 'Checked In' : 'Not Checked In')}
-                            color={visit.checkedOut ? 'default' : (visit.checkedIn ? 'success' : 'warning')}
+                            label={visit.checked_out ? 'Checked Out' : (visit.checked_in ? 'Checked In' : 'Not Checked In')}
+                            color={visit.checked_out ? 'default' : (visit.checked_in ? 'success' : 'warning')}
                         />
                     </div>
                     <Divider />
@@ -255,13 +243,13 @@ export default function CheckInPanel() {
                             <div className="info-row">
                                 <div className="info-item">
                                     <Typography variant="body2" color="textSecondary">Full Name</Typography>
-                                    <Typography variant="body1">{visit.guest.fullName}</Typography>
+                                    <Typography variant="body1">{visit.guest_id.fullname}</Typography>
                                 </div>
                                 <div className="info-item">
                                     <Typography variant="body2" color="textSecondary">Phone</Typography>
-                                    <Typography variant="body1">{visit.guest.phone}</Typography>
+                                    <Typography variant="body1">{visit.guest_id.phone}</Typography>
                                 </div>
-                                {visit.guest.isVip && (
+                                {visit.guest_id.isVip && (
                                     <Chip label="VIP" color="primary" size="small" className="vip-chip" />
                                 )}
                             </div>
@@ -273,9 +261,13 @@ export default function CheckInPanel() {
                             </Typography>
                             <div className="info-row">
                                 <div className="info-item">
+                                    <Typography variant="body2" color="textSecondary">Visit Code</Typography>
+                                    <Typography variant="body1">{visit.unique_code}</Typography>
+                                </div>
+                                <div className="info-item">
                                     <Typography variant="body2" color="textSecondary">Date</Typography>
                                     <Typography variant="body1">
-                                        {format(new Date(visit.visitDate), 'MMM dd, yyyy')}
+                                        {format(new Date(visit.visit_date), 'MMM dd, yyyy')}
                                     </Typography>
                                 </div>
                                 <div className="info-item">
@@ -284,11 +276,11 @@ export default function CheckInPanel() {
                                 </div>
                                 <div className="info-item">
                                     <Typography variant="body2" color="textSecondary">Department</Typography>
-                                    <Typography variant="body1">{visit.department}</Typography>
+                                    <Typography variant="body1">{visit.department_id.department_name}</Typography>
                                 </div>
                                 <div className="info-item">
                                     <Typography variant="body2" color="textSecondary">Requester</Typography>
-                                    <Typography variant="body1">{visit.requester}</Typography>
+                                    <Typography variant="body1">{visit.user_id.fullname}</Typography>
                                 </div>
                             </div>
                         </div>
@@ -300,42 +292,40 @@ export default function CheckInPanel() {
                                 </Typography>
                                 <div className="info-row">
                                     <div className="info-item">
-                                        <Typography variant="body2" color="textSecondary">Plate Number</Typography>
-                                        <Typography variant="body1">{visit.car.plateNumber}</Typography>
-                                    </div>
-                                    <div className="info-item">
-                                        <Typography variant="body2" color="textSecondary">Model</Typography>
-                                        <Typography variant="body1">{visit.car.model}</Typography>
-                                    </div>
-                                    <div className="info-item">
-                                        <Typography variant="body2" color="textSecondary">Color</Typography>
-                                        <Typography variant="body1">{visit.car.color}</Typography>
+                                        <Typography variant="body2" color="textSecondary">Car Name</Typography>
+                                        <Typography variant="body1">{visit.car.car_name}</Typography>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        <div className="details-section">
-                            <Typography variant="subtitle1" className="section-title">
-                                Items
-                            </Typography>
-                            <TableContainer>
-                                <Table size="small">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Item Name</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {visit.items.map((item) => (
-                                            <TableRow key={item.id}>
-                                                <TableCell>{item.name}</TableCell>
+                        {visit.items && visit.items.length > 0 && (
+                            <div className="details-section">
+                                <Typography variant="subtitle1" className="section-title">
+                                    Items
+                                </Typography>
+                                <TableContainer>
+                                    <Table size="small">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Item Name</TableCell>
+                                                <TableCell>Quantity</TableCell>
+                                                <TableCell>Serial Number</TableCell>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </div>
+                                        </TableHead>
+                                        <TableBody>
+                                            {visit.items.map((item) => (
+                                                <TableRow key={item._id}>
+                                                    <TableCell>{item.item_name}</TableCell>
+                                                    <TableCell>{item.quantity}</TableCell>
+                                                    <TableCell>{item.serial_number}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </div>
+                        )}
                     </div>
 
                     <Divider className="actions-divider" />
@@ -347,7 +337,7 @@ export default function CheckInPanel() {
                                 {success && <Alert severity="success" className="alert-message">{success}</Alert>}
                             </div>
                         )}
-                        {visit.checkedOut ? (
+                        {visit.checked_out ? (
                             <button
                                 className="completed-button"
                                 disabled={true}
@@ -357,13 +347,13 @@ export default function CheckInPanel() {
                             </button>
                         ) : (
                             <>
-                                {!visit.checkedIn ? (
+                                {!visit.checked_in ? (
                                     <button
                                         className="check-in-button"
                                         onClick={handleCheckIn}
                                         disabled={loading}
                                     >
-                                        <CheckCircleIcon sx={{ fontSize: 20 }} />
+                                        {loading ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon sx={{ fontSize: 20 }} />}
                                         Check In
                                     </button>
                                 ) : (
@@ -372,7 +362,7 @@ export default function CheckInPanel() {
                                         onClick={handleCheckOut}
                                         disabled={loading}
                                     >
-                                        <LogoutIcon sx={{ fontSize: 20 }} />
+                                        {loading ? <CircularProgress size={20} color="inherit" /> : <LogoutIcon sx={{ fontSize: 20 }} />}
                                         Check Out
                                     </button>
                                 )}

@@ -2,28 +2,29 @@
     padding: 24px;
     max-width: 1200px;
     margin: 0 auto;
+    background: #f4f8fb;
 }
 
 .page-header {
     margin-bottom: 30px;
     padding: 32px;
-    background: linear-gradient(135deg, #3AAFA9 0%, #2B7A78 100%);
-    border-radius: 12px;
+    background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+    border-radius: 16px;
     color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(67, 206, 162, 0.15);
 }
 
 .header-title {
     font-size: 36px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     margin-bottom: 8px !important;
     color: white !important;
 }
 
 .header-subtitle {
     font-size: 18px !important;
-    opacity: 0.9;
-    color: white !important;
+    opacity: 0.95;
+    color: #e0f7fa !important;
 }
 
 .search-filter-container {
@@ -42,10 +43,10 @@
 
 .table-container {
     background: white;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(24, 90, 157, 0.08);
+    margin-bottom: 32px;
 }
 
 /* Table Styles */
@@ -53,18 +54,21 @@
     transition: background-color 0.2s ease;
 }
 
-.table-row:hover {
-    background-color: #f5f5f5 !important;
+.MuiTableRow-root.table-row:hover {
+    background: #F2EFE7 !important;
+    transition: background 0.2s;
 }
 
 /* Sticky Header */
 .MuiTableHead-root {
-    background-color: #f8f9fa;
+    background-color: #F2EFE7 !important;
 }
 
 .MuiTableHead-root .MuiTableCell-root {
-    font-weight: 600;
-    background-color: #f8f9fa;
+    font-weight: 700;
+    background: #f6f5f5 !important;
+    color: white;
+    border-bottom: 2px solid #e0e0e0;
 }
 
 /* Sort Labels */
@@ -86,9 +90,9 @@
     justify-content: center;
     align-items: center;
     min-height: 200px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: #f4f8fb;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(24, 90, 157, 0.08);
 }
 
 /* Empty State */
@@ -98,9 +102,9 @@
     align-items: center;
     justify-content: center;
     padding: 48px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #e0f7fa 0%, #f4f8fb 100%);
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(24, 90, 157, 0.08);
     text-align: center;
 }
 
@@ -112,13 +116,16 @@
 
 /* Section Title */
 .section-title {
-    color: #1F2C40;
-    font-weight: 600 !important;
+    color: #185a9d;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
 }
 
 /* Status Chips */
 .MuiChip-root {
-    font-weight: 500;
+    font-weight: 600;
+    border-radius: 8px;
+    font-size: 0.95em;
 }
 
 .MuiChip-colorSuccess {
@@ -217,4 +224,27 @@
 .MuiIconButton-root:hover {
     background-color: rgba(0, 0, 0, 0.04);
     transform: scale(1.1);
+}
+
+/* Table Pagination */
+.MuiTablePagination-root {
+    background: #f4f8fb;
+}
+
+/* Switch */
+.MuiSwitch-root {
+    color: #185a9d !important;
+}
+
+/* Input Base */
+.MuiInputBase-root {
+    border-radius: 8px !important;
+    background: #f4f8fb !important;
+    box-shadow: 0 2px 8px rgba(24, 90, 157, 0.08) !important;
+}
+
+/* Modal gradient border */
+.MuiModal-root .MuiBox-root {
+    border: 2px solid #43cea2 !important;
+    background: linear-gradient(120deg, #f4f8fb 60%, #e0f7fa 100%) !important;
 }
