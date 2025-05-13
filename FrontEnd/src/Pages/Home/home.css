@@ -1,6 +1,6 @@
 .home{
     flex: 4;
-    padding: 20px;
+    padding: 30px;
 }
 
 .dashboard-title {
@@ -55,4 +55,13 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
     background: linear-gradient(145deg, #ffffff, #e8eaf3);
+}
+
+.homeContainer {
+    margin-right: 270px;
+    transition: margin-right 0.3s ease;
+}
+
+.homeContainer.panel-compressed {
+    margin-right: 40px;
 }

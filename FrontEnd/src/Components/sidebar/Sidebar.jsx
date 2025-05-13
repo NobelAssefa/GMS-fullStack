@@ -74,7 +74,7 @@ export default function Sidebar({ isCollapsed }) {
                 Visit Approvals	 
               </li>
             </Link>}
-            {role === "SECURITY" && <Link to="/checkin" className="link" onClick={() => handleItemClick("/checkin")}>
+            {(role === "SECURITY" || isAdmin) && <Link to="/checkin" className="link" onClick={() => handleItemClick("/checkin")}>
               <li className={`sidebarListItem ${activeItem === "/checkin" ? "active" : ""}`}>
                 <OpenInNewIcon className="sideBarIcons" />
                 CheckIn/Out Panel	 

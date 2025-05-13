@@ -1,3 +1,14 @@
+@keyframes fadeInChart {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .chart {
     background: #fff;
     border-radius: 18px;
@@ -5,6 +16,7 @@
     padding: 32px 28px 24px 28px;
     margin-bottom: 32px;
     min-width: 340px;
+    animation: fadeInChart 0.8s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .chartTitle {

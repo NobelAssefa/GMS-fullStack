@@ -4,6 +4,8 @@
     box-shadow: 0 0 15px -10px rgba(0, 0, 0, 0.75);
     background-color: white;
     border-radius: 10px;
+    position: relative;
+    overflow: visible;
 }
 .widgetSmTitle{
     font-size: 22px;
@@ -60,4 +62,20 @@
     font-weight: 300;
     color: #666;
     font-size: 14px;
+}
+.in-widget-modal {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  padding: 24px 20px;
+  min-width: 260px;
+  max-width: 90%;
+  max-height: 70vh;
+  overflow-y: auto;
+  border: 1.5px solid #f0f0f0;
 }

@@ -1,71 +1,75 @@
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .featured{
     width: 100%;
     display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 20px;
+    gap: 24px;
+    margin-bottom: 32px;
 }
 .featuredItem{
     flex: 1;
-    padding: 30px;
+    padding: 14px 10px 10px 14px;
     border-radius: 10px;
-    color: white;
-    background-color: white;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    min-width: 250px;
-}
-.featuredItem.total {
-    background-color: #0D623F;
-}
-.featuredItem.pending {
-    background-color: #FA5046;
-}
-.featuredItem.active {
-    background-color: #204B98;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    min-width: 100px;
+    min-height: 110px;
+    position: relative;
+    animation: fadeInUp 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.25s cubic-bezier(0.23, 1, 0.32, 1);
 }
 .featuredItem:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: scale(1.045) translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    z-index: 2;
+}
+.featured-total {
+    background: linear-gradient(135deg, #0D623F 60%, #1CBF73 100%);
+    color: #fff;
+}
+.featured-pending {
+    background: linear-gradient(135deg, #FF521B 60%, #FFB86B 100%);
+    color: #fff;
+}
+.featured-active {
+    background: linear-gradient(135deg, #204B98 60%, #4F8CFF 100%);
+    color: #fff;
+}
+.featuredIcon {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.13);
 }
 .featuredTitle{
-    font-size: 20px;
-    color: inherit;
-    font-weight: 600;
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
 }
-.featuredMoneyContainer{
-    margin: 15px 0;
-    display: flex;
-    align-items: center;
+.featuredValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
 }
-.featureMoney{
-    font-size: 30px;
-    font-weight: 600;
-    color: inherit;
-}
-.featureMoneyRate{
-    display: flex;
-    font-weight: 600;
-    align-items: center;
-    margin-left: 20px;
-    padding: 5px 10px;
-    border-radius: 20px;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: inherit;
-}
-.featuredName{
-    margin-left: 10px;
-    color: #FFFFFF;
-    font-size: 13px !important;
-    font-weight: 500;
-}
-.featuredName.negative{
-    color: #FFE5E5;
-    margin-left: 10px;
-    font-size: 13px;
-}
-.featureSub{
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 15px;
-    margin-top: 5px;
+.featuredSub{
+    font-size: 0.9rem;
+    font-weight: 400;
+    opacity: 0.85;
 }
