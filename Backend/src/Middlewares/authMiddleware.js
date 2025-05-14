@@ -63,7 +63,7 @@ const is_Admin = AsyncHandler(async (req, res, next) => {
         }
 
         next();
-    } catch (error) {
+    }catch (error) {
         res.status(401);
         throw new Error('Not authorized, please login');
     }

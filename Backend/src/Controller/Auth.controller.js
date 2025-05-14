@@ -7,48 +7,96 @@ const Token = require('../Models/token.model')
 const sendEmail = require('../Utils/sendEmail')
 const generateToken = require("../Utils/generateToken")
 const { is_Admin } = require('../Middlewares/authMiddleware')
+// Cloudinary and Multer
+const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../Utils/cloudinary');
+const Role = require('../Models/userRole.model');
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'user_avatars',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+  },
+});
+const upload = multer({ storage: storage });
+
 //USER REGISTRATION
 const registerUser = AsyncHandler(
     async (req, res) => {
+        console.log('Registration request received');
+        console.log('Request body:', req.body);
+        console.log('Request file:', req.file);
+        console.log('Request files:', req.files);
+
         const { fullName, email, password, phone, status, role_id, department_id, is_Admin } = req.body;
 
-        if (!fullName || !email || !password) {
+        if (!fullName || !email || !password || !role_id) {
             res.status(400);
-            throw new Error("Please fill all required forms");
+            throw new Error("Please fill all required fields");
         }
         if (password.length < 6) {
             res.status(400);
             throw new Error("password must be greater than 6 characters");
         }
 
+        // Check if user exists
         const userExist = await User.findOne({ email });
         if (userExist) {
             res.status(400);
-            throw new Error("email is already registerd!");
+            throw new Error("email is already registered!");
         }
 
-        // Create user with role and department IDs
-        const user = await User.create({
+        // Get the role to check if it's DIRECTOR
+        const role = await Role.findById(role_id);
+        if (!role) {
+            res.status(400);
+            throw new Error("Invalid role selected");
+        }
+
+        // Validate department requirement based on role
+        if (role.roleName === 'DIRECTOR' && !department_id) {
+            res.status(400);
+            throw new Error("Department is required for Director role");
+        }
+
+        // Get avatar URL from Cloudinary if file uploaded
+        let avatarUrl = "";
+        if (req.file) {
+            console.log("File upload details:", {
+                fieldname: req.file.fieldname,
+                originalname: req.file.originalname,
+                path: req.file.path,
+                cloudinaryUrl: req.file.path
+            });
+            avatarUrl = req.file.path;
+            console.log("Setting avatar URL to:", avatarUrl);
+        } else {
+            console.log("No file detected in request");
+        }
+        
+        // Create user with all fields including avatar
+        const userData = {
             fullName,
             email,
             password,
             phone,
-            status,
+            status: status === 'true' || status === true,
             role_id,
-            department_id,
-            is_Admin
+            department_id: role.roleName === 'DIRECTOR' ? department_id : null, // Only set department for DIRECTOR
+            is_Admin: is_Admin === 'true' || is_Admin === true,
+            avatar: avatarUrl
+        };
+        console.log("Creating user with data:", { 
+            ...userData, 
+            password: '[HIDDEN]',
+            avatar: userData.avatar // Explicitly log avatar field
         });
 
-        const token = generateToken(user._id);
-
-        //SENDING HTTPONLY COOKIE
-        res.cookie("token", token, {
-            path: "/",
-            httpOnly: true,
-            expires: new Date(Date.now() + 1000 * 86400), // 1day
-            sameSite: 'none',
-            secure: true
-        });
+        const user = await User.create(userData);
+        console.log("User created:", user._id);
+        console.log("Created user avatar field:", user.avatar);
 
         if (user) {
             // Populate role and department before sending response
@@ -56,8 +104,8 @@ const registerUser = AsyncHandler(
                 .populate('role_id', 'roleName')
                 .populate('department_id', 'departmentName');
 
-            const { _id, fullName, email, phone, status, role_id, department_id, is_Admin } = populatedUser;
-            res.status(201).json({
+            const { _id, fullName, email, phone, status, role_id, department_id, is_Admin, avatar } = populatedUser;
+            const response = {
                 _id,
                 fullName,
                 email,
@@ -72,11 +120,13 @@ const registerUser = AsyncHandler(
                     departmentName: department_id.departmentName
                 } : null,
                 is_Admin,
-                token
-            });
+                avatar
+            };
+            console.log("Sending response:", response);
+            res.status(201).json(response);
         } else {
             res.status(400);
-            throw new Error("Invalid user!");
+            throw new Error("Invalid user data!");
         }
     }
 );

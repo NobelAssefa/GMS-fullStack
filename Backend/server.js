@@ -1,8 +1,19 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+// Debug: Check if .env is loaded
+console.log('Current working directory:', process.cwd());
+console.log('.env path:', path.join(__dirname, '.env'));
+console.log('Environment variables loaded:', {
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  NODE_ENV: process.env.NODE_ENV
+});
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
-const dotenv = require('dotenv')
 const connectDB = require('./src/Config/db')
 const authRoutes = require('./src/Routes/auth.routes')
 const userRoutes = require('./src/Routes/user.routes')
@@ -11,14 +22,12 @@ const department = require('./src/Routes/department.routes')
 const guest = require('./src/Routes/guest.routes')
 const car = require('./src/Routes/car.routes')
 const visit = require('./src/Routes/visit.routes')
+const upload = require('./src/Routes/upload.routes')
 const errorHandler = require('./src/Middlewares/errorHandler')
 const cookieParser = require('cookie-parser')
 
-
 const app = express();
-dotenv.config();
 connectDB();
-
 
 // MIDDLEWARES
 app.use(cors({
@@ -41,8 +50,7 @@ app.use("/api/department", department)
 app.use("/api/guest", guest)
 app.use("/api/car", car)
 app.use("/api/visit", visit)
-
-
+app.use("/api/upload", upload)
 
 app.use(errorHandler)
 

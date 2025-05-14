@@ -38,8 +38,18 @@ export const authService = {
         return response.data;
     },
     register: async (userData) => {
-        const response = await api.post('/auth/register', userData);
-        return response.data;
+        try {
+            const response = await api.post('/auth/register', userData, {
+                headers: {
+                    ...(userData instanceof FormData ? 
+                        { 'Content-Type': 'multipart/form-data' } : 
+                        { 'Content-Type': 'application/json' })
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Registration failed';
+        }
     },
     checkAuth: async () => {
         const response = await api.get('/auth/check-auth');

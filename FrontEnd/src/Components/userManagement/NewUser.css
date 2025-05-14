@@ -32,3 +32,45 @@
     text-transform: none !important;
     padding: 8px 24px !important;
 } 
+
+.profile-picture-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-picture-upload {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.profile-picture-upload:hover {
+    opacity: 0.9;
+}
+
+.profile-picture-upload img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.upload-icon-button {
+    position: absolute !important;
+    bottom: 0;
+    right: 0;
+    background-color: white !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.upload-icon-button:hover {
+    background-color: #f5f5f5 !important;
+}
+
+.css-131v40p-MuiPaper-root{
+    background-color: #EBF1F6 !important;
+}

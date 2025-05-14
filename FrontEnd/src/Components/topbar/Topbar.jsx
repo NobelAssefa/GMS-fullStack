@@ -73,7 +73,7 @@ export default function Topbar() {
          
              <div className="avatar-container" ref={dropdownRef}>
                  <img 
-                     src={user?.img || "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=400"} 
+                     src={user?.avatar || "https://th.bing.com/th/id/R.1f75f1bf3fb9ca8b5d4b85ebe927e79b?rik=jTrTb%2bFNmqWs%2bg&pid=ImgRaw&r=0"} 
                      alt={user?.fullName || "User"} 
                      className="avatar" 
                      onClick={toggleDropdown}

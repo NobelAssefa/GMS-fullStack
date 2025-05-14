@@ -14,10 +14,12 @@ import {
     Snackbar,
     Alert,
     FormControlLabel,
-    Switch
+    Switch,
+    Avatar
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import userService from '../../Services/userService';
 import './NewUser.css';
 import api, { authService } from '../../Services/api';
@@ -33,19 +35,22 @@ const NewUser = () => {
         password: '',
         confirmPassword: '',
         status: true,
-        is_Admin: false
+        is_Admin: false,
+        profilePicture: null
     });
+    const [previewUrl, setPreviewUrl] = useState(null);
     const [roles, setRoles] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [errors, setErrors] = useState({});
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const [loading, setLoading] = useState(false);
+    const [selectedRole, setSelectedRole] = useState(null);
 
     useEffect(() => {
         // Fetch roles and departments
         const fetchData = async () => {
             try {
-                console.log("trying to featch roles and departments ");
+                console.log("trying to fetch roles and departments ");
                 
                 const [rolesData, departmentsData] = await Promise.all([
                     userService.getRoles(),
@@ -61,11 +66,54 @@ const NewUser = () => {
     }, []);
 
     const handleChange = (e) => {
-        const { name, value, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: e.target.type === 'checkbox' ? checked : value
-        }));
+        const { name, value, checked, type } = e.target;
+        if (type === 'file') {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showSnackbar('Image size should be less than 5MB', 'error');
+                    return;
+                }
+                if (!file.type.startsWith('image/')) {
+                    showSnackbar('Please upload an image file', 'error');
+                    return;
+                }
+                setFormData(prev => ({
+                    ...prev,
+                    profilePicture: file
+                }));
+                // Create preview URL
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setPreviewUrl(reader.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            }));
+
+            // Update selectedRole when role changes
+            if (name === 'role_id') {
+                const role = roles.find(r => r._id === value);
+                setSelectedRole(role);
+                // Clear department if new role is not DIRECTOR
+                if (role?.roleName !== 'DIRECTOR') {
+                    setFormData(prev => ({
+                        ...prev,
+                        department_id: '',
+                        [name]: value
+                    }));
+                } else {
+                    setFormData(prev => ({
+                        ...prev,
+                        [name]: value
+                    }));
+                }
+            }
+        }
         // Clear error when user starts typing
         if (errors[name]) {
             setErrors(prev => ({ ...prev, [name]: '' }));
@@ -78,13 +126,14 @@ const NewUser = () => {
         if (!formData.fullName) newErrors.fullName = 'Full name is required';
         if (!formData.email) newErrors.email = 'Email is required';
         if (!formData.role_id) newErrors.role_id = 'Role is required';
-        if (!formData.department_id) newErrors.department_id = 'Department is required';
+        if (selectedRole?.roleName === 'DIRECTOR' && !formData.department_id) {
+            newErrors.department_id = 'Department is required for Director role';
+        }
         if (!formData.password) newErrors.password = 'Password is required';
         if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
         if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Passwords do not match';
         }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -98,14 +147,38 @@ const NewUser = () => {
 
         setLoading(true);
         try {
-            // Remove confirmPassword before sending to API
-            const { confirmPassword, ...userData } = formData;
-            await authService.register(userData);
+            // Create FormData object to send multipart/form-data
+            const formDataToSend = new FormData();
+            
+            // Add all user data fields
+            formDataToSend.append('fullName', formData.fullName);
+            formDataToSend.append('email', formData.email);
+            formDataToSend.append('phone', formData.phone);
+            formDataToSend.append('password', formData.password);
+            formDataToSend.append('role_id', formData.role_id);
+            formDataToSend.append('department_id', formData.department_id);
+            formDataToSend.append('status', formData.status);
+            formDataToSend.append('is_Admin', formData.is_Admin);
+
+            // Add the profile picture if it exists
+            if (formData.profilePicture) {
+                formDataToSend.append('avatar', formData.profilePicture);
+            }
+
+            // Register user with FormData
+            const response = await api.post('/auth/register', formDataToSend, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
             showSnackbar('User created successfully');
-            navigate('/user');
+            setTimeout(() => {
+                navigate('/user');
+            }, 1500); // Navigate after 1.5 seconds
         } catch (error) {
+            console.error('Registration error:', error);
             showSnackbar(error.message || 'Failed to create user', 'error');
-        } finally {
             setLoading(false);
         }
     };
@@ -132,6 +205,43 @@ const NewUser = () => {
                 
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={3}>
+                        {/* Profile Picture Upload */}
+                        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                            <Box sx={{ position: 'relative' }}>
+                                <Avatar
+                                    src={previewUrl}
+                                    sx={{
+                                        width: 100,
+                                        height: 100,
+                                        mb: 2,
+                                        border: '2px solid #eee'
+                                    }}
+                                />
+                                <input
+                                    accept="image/*"
+                                    type="file"
+                                    id="profile-picture"
+                                    name="profilePicture"
+                                    onChange={handleChange}
+                                    style={{ display: 'none' }}
+                                />
+                                <label htmlFor="profile-picture">
+                                    <IconButton
+                                        component="span"
+                                        sx={{
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            right: 0,
+                                            backgroundColor: 'white',
+                                            '&:hover': { backgroundColor: '#f5f5f5' }
+                                        }}
+                                    >
+                                        <AddPhotoAlternateIcon />
+                                    </IconButton>
+                                </label>
+                            </Box>
+                        </Grid>
+
                         <Grid item xs={12}>
                             <TextField
                                 fullWidth
@@ -192,29 +302,31 @@ const NewUser = () => {
                                 )}
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <FormControl fullWidth error={!!errors.department_id} disabled={loading}>
-                                <InputLabel>Department</InputLabel>
-                                <Select
-                                    name="department_id"
-                                    value={formData.department_id}
-                                    onChange={handleChange}
-                                    label="Department"
-                                    required
-                                >
-                                    {departments.map((dept) => (
-                                        <MenuItem key={dept._id} value={dept._id}>
-                                            {dept.departmentName}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                {errors.department_id && (
-                                    <Typography color="error" variant="caption">
-                                        {errors.department_id}
-                                    </Typography>
-                                )}
-                            </FormControl>
-                        </Grid>
+                        {selectedRole?.roleName === 'DIRECTOR' && (
+                            <Grid item xs={12} sm={6}>
+                                <FormControl fullWidth error={!!errors.department_id} disabled={loading}>
+                                    <InputLabel>Department</InputLabel>
+                                    <Select
+                                        name="department_id"
+                                        value={formData.department_id}
+                                        onChange={handleChange}
+                                        label="Department"
+                                        required
+                                    >
+                                        {departments.map((dept) => (
+                                            <MenuItem key={dept._id} value={dept._id}>
+                                                {dept.departmentName}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    {errors.department_id && (
+                                        <Typography color="error" variant="caption">
+                                            {errors.department_id}
+                                        </Typography>
+                                    )}
+                                </FormControl>
+                            </Grid>
+                        )}
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
@@ -294,8 +406,9 @@ const NewUser = () => {
 
             <Snackbar
                 open={snackbar.open}
-                autoHideDuration={6000}
+                autoHideDuration={2000}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
                 <Alert
                     onClose={() => setSnackbar({ ...snackbar, open: false })}

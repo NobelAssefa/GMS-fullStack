@@ -16,9 +16,7 @@ const userService = {
     // Get single user
     getUser: async (id) => {
         try {
-            const response = await api.get(`${API_URL}/getuser/${id}`, {
-                withCredentials: true
-            });
+            const response = await api.get(`${API_URL}/getuserbyid/${id}`);
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to fetch user';
@@ -28,16 +26,24 @@ const userService = {
     // Create new user
     createUser: async (userData) => {
         try {
-            const emailNormalized = userData.email.trim().toLowerCase();
-            const userExist = await api.get(`${API_URL}/checkemail/${emailNormalized}`);
-            if (userExist.data.exists) {
-                throw new Error("email is already registered");
+            const formData = new FormData();
+            
+            // Append all user data except avatar
+            Object.keys(userData).forEach(key => {
+                if (key !== 'avatar') {
+                    formData.append(key, userData[key]);
+                }
+            });
+
+            // Append avatar if it exists
+            if (userData.avatar) {
+                formData.append('avatar', userData.avatar);
             }
-            const response = await api.post(`/auth/register`, {
-                ...userData,
-                email: emailNormalized
-            }, {
-                withCredentials: true
+
+            const response = await api.post(`/auth/register`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
             });
             return response.data;
         } catch (error) {
@@ -48,8 +54,24 @@ const userService = {
     // Update user
     updateUser: async (id, userData) => {
         try {
-            const response = await api.put(`/user/update/${id}`, userData, {
-                withCredentials: true
+            const formData = new FormData();
+            
+            // Append all user data except avatar
+            Object.keys(userData).forEach(key => {
+                if (key !== 'avatar') {
+                    formData.append(key, userData[key]);
+                }
+            });
+
+            // Append avatar if it exists
+            if (userData.avatar) {
+                formData.append('avatar', userData.avatar);
+            }
+
+            const response = await api.put(`${API_URL}/update/${id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
             });
             return response.data;
         } catch (error) {
@@ -60,9 +82,7 @@ const userService = {
     // Delete user
     deleteUser: async (id) => {
         try {
-            const response = await api.delete(`/user/delete/${id}`, {
-                withCredentials: true
-            });
+            const response = await api.delete(`${API_URL}/delete/${id}`);
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to delete user';
@@ -72,9 +92,7 @@ const userService = {
     // Get all roles
     getRoles: async () => {
         try {
-            const response = await api.get(`/role/getroles`, {
-                withCredentials: true
-            });
+            const response = await api.get(`/role/getroles`);
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to fetch roles';
@@ -84,9 +102,7 @@ const userService = {
     // Get all departments
     getDepartments: async () => {
         try {
-            const response = await api.get(`/department/getdepartments`, {
-                withCredentials: true
-            });
+            const response = await api.get(`/department/getdepartments`);
             return response.data;
         } catch (error) {
             throw error.response?.data?.message || 'Failed to fetch departments';

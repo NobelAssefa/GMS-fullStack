@@ -16,6 +16,7 @@ import CheckInPanelPage from './Pages/CheckInPanel/CheckInPanelPage';
 import UserManagementPage from './Pages/UserManagement/UserManagementPage';
 import LoginPage from './Pages/Login/LoginPage';
 import NewUser from './Components/userManagement/NewUser';
+import EditUser from './Components/userManagement/EditUser';
 import ProtectedRoute from './Components/ProtectedRoute';
 import AuthProvider from './Components/AuthProvider';
 import DepartmentPage from './Pages/Department/DepartmentPage';
@@ -92,6 +93,12 @@ function App() {
             <Route path="/users/new" element={
               <ProtectedRoute>
                 <NewUser />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/user/edit/:id" element={
+              <ProtectedRoute>
+                <EditUser />
               </ProtectedRoute>
             } />
             

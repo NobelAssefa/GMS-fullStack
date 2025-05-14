@@ -27,15 +27,23 @@ const userSchema = mongoose.Schema({
         type: String,
         default: "+251"
     },
+    avatar: {
+        type: String,
+        default: ""
+    },
     status:{
         type:Boolean,
         default:true
     },
     role_id:{
-        type:mongoose.Schema.Types.ObjectId,ref:"Role"
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Role",
+        required: [true, "Role is required"]
     },
     department_id:{
-        type:mongoose.Schema.Types.ObjectId,ref:"Department"
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Department",
+        // Will be validated at the controller level based on role
     },
     is_Admin:{
         type:Boolean,
@@ -45,8 +53,6 @@ const userSchema = mongoose.Schema({
         type:Date,
         default:Date.now
     }
-
-
 },{
     timestamps:true
 });

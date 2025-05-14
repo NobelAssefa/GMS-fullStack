@@ -18,7 +18,11 @@ import {
     MenuItem,
     Tooltip,
     Snackbar,
-    Alert
+    Alert,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -40,6 +44,7 @@ export default function UserManagement() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const [userToDelete, setUserToDelete] = useState(null);
 
     useEffect(() => {
         fetchUsers();
@@ -50,6 +55,8 @@ export default function UserManagement() {
             setLoading(true);
             const data = await userService.getAllUsers();
             setUsers(data);
+            console.log("all users", data);
+            
             setError(null);
         } catch (err) {
             setError('Failed to fetch users');
@@ -87,20 +94,22 @@ export default function UserManagement() {
         setSelectedUser(null);
     };
 
-    const handleEdit = () => {
-        navigate(`/users/edit/${selectedUser._id}`);
-        handleMenuClose();
+    const handleEdit = (user) => {
+        navigate(`/user/edit/${user._id}`);
     };
 
     const handleDelete = async () => {
+        if (!userToDelete) return;
+        
         try {
-            await userService.deleteUser(selectedUser._id);
+            await userService.deleteUser(userToDelete._id);
+            setUserToDelete(null);
             showSnackbar('User deleted successfully');
             fetchUsers();
         } catch (err) {
-            showSnackbar('Failed to delete user', 'error');
+            console.error('Error deleting user:', err);
+            showSnackbar(err.message || 'Failed to delete user', 'error');
         }
-        handleMenuClose();
     };
 
     const handleAddNewUser = () => {
@@ -111,13 +120,16 @@ export default function UserManagement() {
         navigate('/roles/new');
     };
 
+    const handleDeleteClick = (user) => {
+        setUserToDelete(user);
+    };
+
     const filteredUsers = users.filter(user =>
         user.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.role_id?.roleName?.toLowerCase().includes(searchQuery.toLowerCase())
+        user.role_id?.roleName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.department_id?.departmentName?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
-
 
     return (
         <div className="user-management">
@@ -189,7 +201,12 @@ export default function UserManagement() {
                                         <TableRow key={user._id}>
                                             <TableCell>
                                                 <div className="user-info">
-                                                    <Avatar src={user.avatar} alt={user.fullName} />
+                                                    <Avatar 
+                                                        src={user.avatar} 
+                                                        alt={user.fullName}
+                                                    >
+                                                        {user.fullName?.charAt(0)}
+                                                    </Avatar>
                                                     <Typography>{user.fullName}</Typography>
                                                 </div>
                                             </TableCell>
@@ -209,19 +226,33 @@ export default function UserManagement() {
                                                     size="small"
                                                 />
                                             </TableCell>
-                                            <TableCell><Chip
-                                                label={user.department_id?.departmentName || 'No Department'}
-                                                color="primary"
-                                                variant="outlined"
-                                                size="small"
-                                            /></TableCell>
-                                            <TableCell align="right">
-                                                <IconButton
+                                            <TableCell>
+                                                <Chip
+                                                    label={user.department_id?.departmentName || 'No Department'}
+                                                    color="primary"
+                                                    variant="outlined"
                                                     size="small"
-                                                    onClick={(e) => handleMenuOpen(e, user)}
-                                                >
-                                                    <MoreVertIcon />
-                                                </IconButton>
+                                                />
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <Tooltip title="Edit">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => handleEdit(user)}
+                                                        color="primary"
+                                                    >
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Delete">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => handleDeleteClick(user)}
+                                                        color="error"
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Tooltip>
                                             </TableCell>
                                         </TableRow>
                                     ))
@@ -239,25 +270,40 @@ export default function UserManagement() {
                 />
             </Paper>
 
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={Boolean(userToDelete)}
+                onClose={() => setUserToDelete(null)}
             >
-                <MenuItem onClick={handleEdit}>
-                    <EditIcon fontSize="small" className="menu-icon" />
-                    Edit
-                </MenuItem>
-                <MenuItem onClick={handleDelete} className="delete-menu-item">
-                    <DeleteIcon fontSize="small" className="menu-icon" />
-                    Delete
-                </MenuItem>
-            </Menu>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to delete user "{userToDelete?.fullName}"?
+                        This action cannot be undone.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button 
+                        onClick={() => setUserToDelete(null)}
+                        color="primary"
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={handleDelete}
+                        color="error"
+                        variant="contained"
+                    >
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Snackbar
                 open={snackbar.open}
-                autoHideDuration={6000}
+                autoHideDuration={2000}
                 onClose={() => setSnackbar({ ...snackbar, open: false })}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
                 <Alert
                     onClose={() => setSnackbar({ ...snackbar, open: false })}

@@ -108,7 +108,7 @@ export default function Sidebar({ isCollapsed }) {
           <div className="userProfile">
             <Avatar 
               alt={user?.fullName || "User"} 
-              src={user?.img || "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=400"} 
+              src={user?.avatar || "https://th.bing.com/th/id/R.1f75f1bf3fb9ca8b5d4b85ebe927e79b?rik=jTrTb%2bFNmqWs%2bg&pid=ImgRaw&r=0"} 
               className="userAvatar"
             />
             {!isCollapsed && (
