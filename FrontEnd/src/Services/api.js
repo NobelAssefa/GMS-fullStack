@@ -17,25 +17,43 @@ api.interceptors.response.use(
         if (error.response) {
             // The request was made and the server responded with a status code
             // that falls out of the range of 2xx
-            return Promise.reject(error.response.data);
+            const errorMessage = error.response.data.message || 'An error occurred';
+            return Promise.reject({ 
+                message: errorMessage,
+                status: error.response.status 
+            });
         } else if (error.request) {
             // The request was made but no response was received
-            return Promise.reject({ message: 'No response from server' });
+            return Promise.reject({ 
+                message: 'No response from server',
+                status: 503
+            });
         } else {
             // Something happened in setting up the request that triggered an Error
-            return Promise.reject({ message: error.message });
+            return Promise.reject({ 
+                message: error.message,
+                status: 500
+            });
         }
     }
 );
 
 export const authService = {
     login: async (email, password) => {
-        const response = await api.post('/auth/login', { email, password });
-        return response.data;
+        try {
+            const response = await api.post('/auth/login', { email, password });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     },
     logout: async () => {
-        const response = await api.post('/auth/logout');
-        return response.data;
+        try {
+            const response = await api.post('/auth/logout');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     },
     register: async (userData) => {
         try {
@@ -48,12 +66,16 @@ export const authService = {
             });
             return response.data;
         } catch (error) {
-            throw error.response?.data?.message || 'Registration failed';
+            throw error;
         }
     },
     checkAuth: async () => {
-        const response = await api.get('/auth/check-auth');
-        return response.data;
+        try {
+            const response = await api.get('/auth/check-auth');
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
 };
 

@@ -22,6 +22,7 @@ import AuthProvider from './Components/AuthProvider';
 import DepartmentPage from './Pages/Department/DepartmentPage';
 import NewDepartmentPage from './Pages/Department/NewDepartmentPage';
 import NewRolePage from './Pages/Role/NewRolePage';
+import Profile from './Components/profile/Profile';
 
 // Layout component to wrap pages that need sidebar and topbar
 const Layout = ({ children }) => {
@@ -141,6 +142,12 @@ function App() {
                 <Route path="/roles/new" element={
                   <ProtectedRoute>
                     <NewRolePage />
+                  </ProtectedRoute>
+                } />
+
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 } />
             

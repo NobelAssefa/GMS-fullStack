@@ -28,7 +28,7 @@ export default function Sidebar({ isCollapsed }) {
   const [activeItem, setActiveItem] = useState("");
   const { user } = useSelector((state) => state.auth);
   const isAdmin = user?.is_Admin;
-  const role = user?.role?.roleName;
+  const userRole = user?.role?.roleName;
 
   useEffect(() => {
     // Set active item based on current path
@@ -43,6 +43,10 @@ export default function Sidebar({ isCollapsed }) {
   const isDashboardActive = () => {
     return activeItem === "/" || activeItem === "/home";
   };
+
+  if (!user) {
+    return null; // Don't render sidebar if user is not authenticated
+  }
 
   return (
     <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -68,36 +72,40 @@ export default function Sidebar({ isCollapsed }) {
                 Visit Request
               </li>
             </Link>
-           { role === "SECRATORY" && <Link to="/visit/approval" className="link" onClick={() => handleItemClick("/visit/approval")}>
-              <li className={`sidebarListItem ${activeItem === "/visit/approval" ? "active" : ""}`}>
-                <DoneAllIcon className="sideBarIcons" />
-                Visit Approvals	 
-              </li>
-            </Link>}
-            {(role === "SECURITY" || isAdmin) && <Link to="/checkin" className="link" onClick={() => handleItemClick("/checkin")}>
-              <li className={`sidebarListItem ${activeItem === "/checkin" ? "active" : ""}`}>
-                <OpenInNewIcon className="sideBarIcons" />
-                CheckIn/Out Panel	 
-              </li>
-            </Link>}
+            {(userRole === "DIRECTOR" || isAdmin) && (
+              <Link to="/visit/approval" className="link" onClick={() => handleItemClick("/visit/approval")}>
+                <li className={`sidebarListItem ${activeItem === "/visit/approval" ? "active" : ""}`}>
+                  <DoneAllIcon className="sideBarIcons" />
+                  Visit Approvals
+                </li>
+              </Link>
+            )}
+            {(userRole === "SECURITY" || isAdmin) && (
+              <Link to="/checkin" className="link" onClick={() => handleItemClick("/checkin")}>
+                <li className={`sidebarListItem ${activeItem === "/checkin" ? "active" : ""}`}>
+                  <OpenInNewIcon className="sideBarIcons" />
+                  CheckIn/Out Panel
+                </li>
+              </Link>
+            )}
             {isAdmin && (
               <>
                 <Link to="/user" className="link" onClick={() => handleItemClick("/user")}>
                   <li className={`sidebarListItem ${activeItem === "/user" ? "active" : ""}`}>
                     <SupervisorAccountIcon className="sideBarIcons" />
-                    User Management 	 
+                    User Management
                   </li>
                 </Link>
                 <Link to="/reports" className="link" onClick={() => handleItemClick("/reports")}>
                   <li className={`sidebarListItem ${activeItem === "/reports" ? "active" : ""}`}>
                     <AssessmentIcon className="sideBarIcons" />
-                    Reports  	 
+                    Reports
                   </li>
                 </Link>
                 <Link to="/department" className="link" onClick={() => handleItemClick("/department")}>
                   <li className={`sidebarListItem ${activeItem === "/department" ? "active" : ""}`}>
                     <BusinessIcon className="sideBarIcons" />
-                    Department Mgmt.  	 
+                    Department Mgmt.
                   </li>
                 </Link>
               </>
@@ -106,15 +114,15 @@ export default function Sidebar({ isCollapsed }) {
         </div>
         <div className="sidebarFooter">
           <div className="userProfile">
-            <Avatar 
-              alt={user?.fullName || "User"} 
-              src={user?.avatar || "https://th.bing.com/th/id/R.1f75f1bf3fb9ca8b5d4b85ebe927e79b?rik=jTrTb%2bFNmqWs%2bg&pid=ImgRaw&r=0"} 
+            <Avatar
+              alt={user?.fullName || "User"}
+              src={user?.avatar || "https://th.bing.com/th/id/R.1f75f1bf3fb9ca8b5d4b85ebe927e79b?rik=jTrTb%2bFNmqWs%2bg&pid=ImgRaw&r=0"}
               className="userAvatar"
             />
             {!isCollapsed && (
               <div className="userInfo">
                 <span className="userName">{user?.fullName || "User"}</span>
-                <span className="userRole">{isAdmin ? "Administrator" : user.role.roleName  }</span>
+                <span className="userRole">{isAdmin ? "Administrator" : user?.role?.roleName || "User"}</span>
               </div>
             )}
           </div>
