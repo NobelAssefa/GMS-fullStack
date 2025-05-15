@@ -112,8 +112,7 @@ export default function GuestTable() {
                                 <TableCell>Email</TableCell>
                                 <TableCell>Phone</TableCell>
                                 <TableCell>Status</TableCell>
-                                <TableCell>Vehicle</TableCell>
-                                <TableCell>Items</TableCell>
+                         
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -123,44 +122,16 @@ export default function GuestTable() {
                                     <TableCell>{guest.email}</TableCell>
                                     <TableCell>{guest.phone}</TableCell>
                                     <TableCell>
-                                        {guest.is_vip && (
+                                        {guest.is_vip?(
                                             <Chip
                                                 icon={<VipIcon />}
                                                 label="VIP"
                                                 color="primary"
                                                 size="small"
                                             />
-                                        )}
+                                        ): "Regular"}
                                     </TableCell>
-                                    <TableCell>
-                                        {guest.has_car && guest.car ? (
-                                            <Tooltip title={`${guest.car.carModel} - ${guest.car.carColor}`}>
-                                                <Chip
-                                                    icon={<CarIcon />}
-                                                    label={guest.car.plateNumber}
-                                                    size="small"
-                                                />
-                                            </Tooltip>
-                                        ) : (
-                                            'No vehicle'
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {guest.items && guest.items.length > 0 ? (
-                                            <Box className="items-container">
-                                                {guest.items.map((item, index) => (
-                                                    <Chip
-                                                        key={index}
-                                                        label={item.name}
-                                                        size="small"
-                                                        className="item-chip"
-                                                    />
-                                                ))}
-                                            </Box>
-                                        ) : (
-                                            'No items'
-                                        )}
-                                    </TableCell>
+                                    
                                 </TableRow>
                             ))}
                         </TableBody>

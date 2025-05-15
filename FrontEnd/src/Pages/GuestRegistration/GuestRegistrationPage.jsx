@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './guestRegistration.css';
 import GuestForm from '../../Components/guestForm/GuestForm';
 import { Alert, Snackbar } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import guestService from '../../Services/guestService';
 
 export default function GuestRegistrationPage() {
@@ -11,7 +10,6 @@ export default function GuestRegistrationPage() {
         message: '',
         severity: 'success'
     });
-    const navigate = useNavigate();
 
     const handleGuestSubmit = async (formData) => {
         try {
@@ -44,14 +42,9 @@ export default function GuestRegistrationPage() {
             
             setFeedback({
                 open: true,
-                message: 'Guest registered successfully!',
+                message: 'Guest registered successfully! You can register another guest.',
                 severity: 'success'
             });
-
-            // Redirect to guest list after successful registration
-            setTimeout(() => {
-                navigate('/guests');
-            }, 2000);
 
         } catch (error) {
             console.error('Registration error:', error);

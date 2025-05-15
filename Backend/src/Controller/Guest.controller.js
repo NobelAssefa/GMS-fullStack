@@ -43,6 +43,23 @@ const getSingleGuest = AsyncHandler(async (req, res) => {
     res.status(200).json(guest);
 });
 
+// Get guests registered by the current user
+const getGuestsByRegisteredUser = AsyncHandler(async (req, res) => {
+    try {
+        // req.user._id should be set by auth middleware
+        const guests = await Guest.find({ registeredBy: req.user._id })
+            .populate('registeredBy', 'fullName email')
+            .sort({ createdAt: -1 }); // Sort by newest first
+
+        console.log(`Found ${guests.length} guests registered by user ${req.user._id}`);
+        res.status(200).json(guests);
+    } catch (error) {
+        console.error('Error fetching guests by user:', error);
+        res.status(500);
+        throw new Error('Failed to fetch guests registered by user');
+    }
+});
+
 const updateGuest = AsyncHandler(async (req,res)=>{
     const{fullName,phone,is_vip,has_car,plateNumber,carModel,carColor,items,profileImage} = req.body;
     const guestExists = await Guest.findById(req.params.id)
@@ -113,5 +130,5 @@ const deleteGuest = AsyncHandler(async (req,res)=>{
 });
 
 module.exports = {
-    createGuest, getGuests, getSingleGuest, updateGuest, deleteGuest
+    createGuest, getGuests, getSingleGuest, updateGuest, deleteGuest, getGuestsByRegisteredUser
 };

@@ -26,7 +26,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import axios from 'axios';
 import visitApprovalService from '../../Services/visitApprovalService';
-
+import guestService from '../../Services/guestService';
 export default function UserVisitRequestsTable() {
     const { user } = useSelector((state) => state.auth);
     const [visits, setVisits] = useState([]);
@@ -47,9 +47,7 @@ export default function UserVisitRequestsTable() {
                     return;
                 }
                 console.log('Fetching visits for user:', user._id);
-                const response = await axios.get(`/api/visit/getvisitsByuserId/${user._id}`, { 
-                    withCredentials: true 
-                });
+                const response = await guestService.getAllVisitByUserId(user._id)
                 console.log('Fetched visits response:', response);
                 if (Array.isArray(response.data)) {
                     setVisits(response.data);

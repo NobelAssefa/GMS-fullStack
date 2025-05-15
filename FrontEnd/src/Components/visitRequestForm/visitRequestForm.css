@@ -237,4 +237,45 @@
     color: #ccc;
     cursor: not-allowed;
     border-color: #eee;
+}
+
+/* Styles for the success dialog (MUI Dialog) */
+.success-dialog .MuiDialog-paper {
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 400px; /* Adjust as needed */
+}
+
+.success-dialog-title {
+    font-weight: bold;
+    color: #1F2C40;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.success-dialog-content {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.success-dialog-content p {
+    margin: 5px 0;
+}
+
+.success-dialog-content .visit-code {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #007bff; /* A nice blue for the code */
+    margin: 10px 0;
+    display: block;
+}
+
+.success-dialog-actions {
+    justify-content: center !important; /* Center the buttons */
+    padding-bottom: 10px !important;
+}
+
+.success-dialog-actions .MuiButton-root {
+    margin: 0 10px;
 } 

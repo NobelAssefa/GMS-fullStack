@@ -7,6 +7,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Checkbox from '@mui/material/Checkbox';
 import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
+import { QRCodeCanvas } from 'qrcode.react';
 import guestService from '../../Services/guestService';
 import { getAllDepartments } from '../../Services/departmentService';
 import { useSelector } from 'react-redux';
@@ -34,8 +35,8 @@ export default function VisitRequestForm({ onSubmit }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showOtherItemInput, setShowOtherItemInput] = useState(false);
     const [newItem, setNewItem] = useState('');
-    const [showSuccess, setShowSuccess] = useState(false);
     const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+    const [isSendingEmail, setIsSendingEmail] = useState(false); // New state for email sending status
 
     const predefinedItems = ['Laptop', 'Phone', 'Tablet', 'Camera', 'Other'];
 
@@ -152,7 +153,6 @@ export default function VisitRequestForm({ onSubmit }) {
             const response = await onSubmit(submitData);
             setSubmittedVisit(response);
             setSubmittedFormData(formData);
-            setShowSuccess(true);
             setShowPreviewDialog(true);
             
             // Reset form but keep department
@@ -176,6 +176,13 @@ export default function VisitRequestForm({ onSubmit }) {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleClosePreviewDialog = () => {
+        setShowPreviewDialog(false);
+        setSubmittedVisit(null); // Clear submitted data to remove preview
+        setSubmittedFormData(null);
+        setIsSendingEmail(false); // Reset email sending state if dialog is closed
     };
 
     const handleDownload = () => {
@@ -218,6 +225,33 @@ export default function VisitRequestForm({ onSubmit }) {
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
+        handleClosePreviewDialog(); // Close dialog after download
+    };
+
+    const handleSendEmailToGuest = async () => {
+        if (!submittedVisit || !submittedFormData || !submittedFormData.guest?.email) {
+            console.error("Missing data to send email.");
+            // Optionally, show an alert to the user
+            alert("Guest email is missing. Cannot send email.");
+            return;
+        }
+        setIsSendingEmail(true);
+        console.log("Attempting to send email to:", submittedFormData.guest.email);
+        // TODO: Construct email data and call a service
+        
+        // Placeholder for now:
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 2000)); 
+            alert(`Email would be sent to ${submittedFormData.guest.email} with details for visit ${submittedVisit.unique_code}`);
+            // On actual success from backend:
+            // handleClosePreviewDialog(); // Optionally close dialog after sending
+        } catch (error) {
+            console.error("Failed to send email:", error);
+            alert("Failed to send email. Please try again.");
+        } finally {
+            setIsSendingEmail(false);
+        }
     };
 
     const renderPreview = () => {
@@ -305,88 +339,6 @@ export default function VisitRequestForm({ onSubmit }) {
                             <Typography>{formData.remark}</Typography>
                         </>
                     )}
-
-                    {/* Submitted Data Preview */}
-                    {submittedFormData && (
-                        <>
-                            <Box sx={{ mt: 4, pt: 3, borderTop: '2px dashed #ccc' }}>
-                                <Typography variant="h6" sx={{ mb: 2, color: '#1F2C40' }}>Submitted Visit Details</Typography>
-                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Guest Information</Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                    <Typography>{submittedFormData.guest ? `${submittedFormData.guest.fullName} (${submittedFormData.guest.email})` : 'No guest selected'}</Typography>
-                                    {submittedFormData.guest && submittedFormData.guest.is_vip && (
-                                        <Typography 
-                                            sx={{ 
-                                                backgroundColor: '#FFD700',
-                                                color: '#000',
-                                                px: 1,
-                                                py: 0.5,
-                                                borderRadius: 1,
-                                                fontSize: '0.75rem',
-                                                fontWeight: 'bold',
-                                                display: 'inline-block'
-                                            }}
-                                        >
-                                            VIP
-                                        </Typography>
-                                    )}
-                                </Box>
-                                
-                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2, mb: 1 }}>Department</Typography>
-                                <Typography>{submittedFormData.department?.departmentName || 'No department selected'}</Typography>
-                                
-                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2, mb: 1 }}>Visit Details</Typography>
-                                <Typography>
-                                    {submittedFormData.durationType === 'single' 
-                                        ? `Single Day: ${submittedFormData.visitDate ? new Date(submittedFormData.visitDate).toLocaleDateString() : 'Not set'}`
-                                        : `Date Range: ${submittedFormData.dateRange?.[0] ? new Date(submittedFormData.dateRange[0]).toLocaleDateString() : 'Not set'} - ${submittedFormData.dateRange?.[1] ? new Date(submittedFormData.dateRange[1]).toLocaleDateString() : 'Not set'}`
-                                    }
-                                </Typography>
-                                
-                                {submittedFormData.hasCar && (
-                                    <Box sx={{ 
-                                        mt: 2, 
-                                        p: 2, 
-                                        backgroundColor: '#f5f5f5', 
-                                        borderRadius: 1,
-                                        border: '1px solid #e0e0e0'
-                                    }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Car Details</Typography>
-                                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
-                                            <Box>
-                                                <Typography variant="body2" color="text.secondary">Plate Number</Typography>
-                                                <Typography>{submittedFormData.plateNumber || 'Not set'}</Typography>
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="body2" color="text.secondary">Model</Typography>
-                                                <Typography>{submittedFormData.carModel || 'Not set'}</Typography>
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="body2" color="text.secondary">Color</Typography>
-                                                <Typography>{submittedFormData.carColor || 'Not set'}</Typography>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                )}
-                                
-                                {submittedFormData.items?.length > 0 && (
-                                    <>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2, mb: 1 }}>Items</Typography>
-                                        {submittedFormData.items.map((item, index) => (
-                                            <Typography key={index}>• {item}</Typography>
-                                        ))}
-                                    </>
-                                )}
-                                
-                                {submittedFormData.remark && (
-                                    <>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2, mb: 1 }}>Remarks</Typography>
-                                        <Typography>{submittedFormData.remark}</Typography>
-                                    </>
-                                )}
-                            </Box>
-                        </>
-                    )}
                 </Box>
             </Paper>
         );
@@ -394,153 +346,95 @@ export default function VisitRequestForm({ onSubmit }) {
 
     return (
         <div className="visit-request-form">
-            <Snackbar 
-                open={showSuccess} 
-                autoHideDuration={6000} 
-                onClose={() => setShowSuccess(false)}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-            >
-                <Alert 
-                    onClose={() => setShowSuccess(false)} 
-                    severity="success" 
-                    sx={{ width: '100%' }}
-                    action={
-                        <Button
-                            color="inherit"
-                            size="small"
-                            startIcon={<DownloadIcon />}
-                            onClick={handleDownload}
-                            sx={{ 
-                                color: '#fff',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                }
-                            }}
-                        >
-                            Download
-                        </Button>
-                    }
-                >
-                    Visit request submitted successfully! Your unique code is: {submittedVisit?.unique_code}
-                </Alert>
-            </Snackbar>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <Dialog open={showPreviewDialog} onClose={handleClosePreviewDialog} className="success-dialog">
+                    <DialogTitle className="success-dialog-title">
+                        {submittedVisit ? "Visit Request Submitted!" : "Preview Visit Request"}
+                    </DialogTitle>
+                    <DialogContent className="success-dialog-content">
+                        {submittedVisit && submittedFormData ? (
+                            <>
+                                <Typography>Your visit request has been successfully submitted.</Typography>
+                                <Typography>Visit Code: <span className="visit-code">{submittedVisit.unique_code}</span></Typography>
+                                
+                                {/* QR Code Display Start */}
+                                <Box sx={{ mt: 2, mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Typography variant="h6" sx={{ mb: 1, color: '#1F2C40'}}>Scan for Visit Details</Typography>
+                                    {
+                                        (() => {
+                                            const qrDetails = [
+                                                `Visit Code: ${submittedVisit.unique_code}`,
+                                                `Guest: ${submittedFormData.guest?.fullName || 'N/A'}`,
+                                                `Department: ${submittedFormData.department?.departmentName || 'N/A'}`,
+                                                `Date(s): ${submittedFormData.durationType === 'single'
+                                                    ? new Date(submittedFormData.visitDate).toLocaleDateString()
+                                                    : `${new Date(submittedFormData.dateRange[0]).toLocaleDateString()} - ${new Date(submittedFormData.dateRange[1]).toLocaleDateString()}`}`
+                                            ];
+                                            if (submittedFormData.hasCar) {
+                                                qrDetails.push(`Car: ${submittedFormData.plateNumber} (${submittedFormData.carModel}, ${submittedFormData.carColor})`);
+                                            }
+                                            if (submittedFormData.items && submittedFormData.items.length > 0) {
+                                                qrDetails.push(`Items: ${submittedFormData.items.join(', ')}`);
+                                            }
+                                            const qrValue = qrDetails.join('\n');
 
-            <Dialog 
-                open={showPreviewDialog} 
-                onClose={() => setShowPreviewDialog(false)}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle>
-                    <Typography variant="h5" sx={{ color: '#1F2C40', fontWeight: 'bold' }}>
-                        Visit Request Details
-                    </Typography>
-                </DialogTitle>
-                <DialogContent>
-                    {submittedFormData && (
-                        <Box sx={{ p: 2 }}>
-                            <Typography variant="h6" sx={{ mb: 2, color: '#1F2C40', textAlign: 'center' }}>
-                                Visit Code: {submittedVisit?.unique_code}
-                            </Typography>
-                            
-                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Guest Information</Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                <Typography>{submittedFormData.guest ? `${submittedFormData.guest.fullName} (${submittedFormData.guest.email})` : 'No guest selected'}</Typography>
-                                {submittedFormData.guest && submittedFormData.guest.is_vip && (
-                                    <Typography 
-                                        sx={{ 
-                                            backgroundColor: '#FFD700',
-                                            color: '#000',
-                                            px: 1,
-                                            py: 0.5,
-                                            borderRadius: 1,
-                                            fontSize: '0.75rem',
-                                            fontWeight: 'bold',
-                                            display: 'inline-block'
-                                        }}
-                                    >
-                                        VIP
+                                            return (
+                                                <QRCodeCanvas 
+                                                    value={qrValue} 
+                                                    size={160} // Increased size slightly for more data
+                                                    bgColor={"#ffffff"}
+                                                    fgColor={"#000000"}
+                                                    level={"L"} 
+                                                    includeMargin={true}
+                                                />
+                                            );
+                                        })()
+                                    }
+                                </Box>
+                                {/* QR Code Display End */}
+
+                                <Typography>Guest: {submittedFormData.guest?.fullName}</Typography>
+                                <Typography>Department: {submittedFormData.department?.departmentName}</Typography>
+                                <Typography>
+                                    Visit Date: {submittedFormData.durationType === 'single'
+                                        ? new Date(submittedFormData.visitDate).toLocaleDateString()
+                                        : `${new Date(submittedFormData.dateRange[0]).toLocaleDateString()} - ${new Date(submittedFormData.dateRange[1]).toLocaleDateString()}`}
+                                </Typography>
+                                {submittedFormData.hasCar && (
+                                    <Typography>
+                                        Car: {submittedFormData.plateNumber} ({submittedFormData.carModel}, {submittedFormData.carColor})
                                     </Typography>
                                 )}
-                            </Box>
-                            
-                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Department</Typography>
-                            <Typography sx={{ mb: 2 }}>{submittedFormData.department?.departmentName || 'No department selected'}</Typography>
-                            
-                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Visit Details</Typography>
-                            <Typography sx={{ mb: 2 }}>
-                                {submittedFormData.durationType === 'single' 
-                                    ? `Single Day: ${submittedFormData.visitDate ? new Date(submittedFormData.visitDate).toLocaleDateString() : 'Not set'}`
-                                    : `Date Range: ${submittedFormData.dateRange?.[0] ? new Date(submittedFormData.dateRange[0]).toLocaleDateString() : 'Not set'} - ${submittedFormData.dateRange?.[1] ? new Date(submittedFormData.dateRange[1]).toLocaleDateString() : 'Not set'}`
-                                }
-                            </Typography>
-                            
-                            {submittedFormData.hasCar && (
-                                <Box sx={{ 
-                                    mb: 2, 
-                                    p: 2, 
-                                    backgroundColor: '#f5f5f5', 
-                                    borderRadius: 1,
-                                    border: '1px solid #e0e0e0'
-                                }}>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Car Details</Typography>
-                                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
-                                        <Box>
-                                            <Typography variant="body2" color="text.secondary">Plate Number</Typography>
-                                            <Typography>{submittedFormData.plateNumber || 'Not set'}</Typography>
-                                        </Box>
-                                        <Box>
-                                            <Typography variant="body2" color="text.secondary">Model</Typography>
-                                            <Typography>{submittedFormData.carModel || 'Not set'}</Typography>
-                                        </Box>
-                                        <Box>
-                                            <Typography variant="body2" color="text.secondary">Color</Typography>
-                                            <Typography>{submittedFormData.carColor || 'Not set'}</Typography>
-                                        </Box>
-                                    </Box>
-                                </Box>
-                            )}
-                            
-                            {submittedFormData.items?.length > 0 && (
-                                <Box sx={{ mb: 2 }}>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Items</Typography>
-                                    {submittedFormData.items.map((item, index) => (
-                                        <Typography key={index}>• {item}</Typography>
-                                    ))}
-                                </Box>
-                            )}
-                            
-                            {submittedFormData.remark && (
-                                <Box sx={{ mb: 2 }}>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>Remarks</Typography>
-                                    <Typography>{submittedFormData.remark}</Typography>
-                                </Box>
-                            )}
-                        </Box>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button 
-                        onClick={() => setShowPreviewDialog(false)}
-                        sx={{ color: '#1F2C40' }}
-                    >
-                        Close
-                    </Button>
-                    <Button
-                        onClick={handleDownload}
-                        startIcon={<DownloadIcon />}
-                        variant="contained"
-                        sx={{ 
-                            backgroundColor: '#1F2C40',
-                            '&:hover': {
-                                backgroundColor: '#2C3E50'
-                            }
-                        }}
-                    >
-                        Download Details
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                                {submittedFormData.items && submittedFormData.items.length > 0 && (
+                                    <Typography>Items: {submittedFormData.items.join(', ')}</Typography>
+                                )}
+                            </>
+                        ) : (
+                            <Typography>Loading preview...</Typography> // Or some other placeholder
+                        )}
+                    </DialogContent>
+                    <DialogActions className="success-dialog-actions">
+                        {submittedVisit && (
+                            <Button onClick={handleDownload} variant="contained" startIcon={<DownloadIcon />}>
+                                Download Details
+                            </Button>
+                        )}
+                        {submittedVisit && submittedFormData?.guest?.email && ( // Show button only if guest email exists
+                            <Button 
+                                onClick={handleSendEmailToGuest} 
+                                variant="outlined" 
+                                disabled={isSendingEmail}
+                                // sx={{ ml: 1 }} // Optional margin
+                            >
+                                {isSendingEmail ? "Sending..." : "Send to Guest Email"}
+                            </Button>
+                        )}
+                        <Button onClick={handleClosePreviewDialog} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </LocalizationProvider>
 
             <div className="visit-form-container">
                 <div className="form-header">
