@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_URL = '/api/guest';
-
+const API_URL_VISIT = '/api/visit';
 // Register a new guest
 const registerGuest = async (guestData) => {
     try {
@@ -19,6 +19,21 @@ const registerGuest = async (guestData) => {
 const getAllGuests = async () => {
     try {
         const response = await axios.get(`${API_URL}/getguests`,{
+            withCredentials: true
+        });
+        console.log('API Response:', response.data); // Debug log
+        return response.data;
+    } catch (error) {
+        if (error.response?.data?.message) {
+            throw new Error(error.response.data.message);
+        }
+        throw new Error(error.message || 'Failed to fetch guests');
+    }
+};
+
+const getAllVisitByUserId = async () => {
+    try {
+        const response = await axios.get(`${API_URL_VISIT}/getvisitsByuserId/${userId}`,{
             withCredentials: true
         });
         console.log('API Response:', response.data); // Debug log
@@ -75,6 +90,7 @@ const deleteGuest = async (id) => {
 const guestService = {
     registerGuest,
     getAllGuests,
+    getAllVisitByUserId,
     getGuestById,
     updateGuest,
     deleteGuest

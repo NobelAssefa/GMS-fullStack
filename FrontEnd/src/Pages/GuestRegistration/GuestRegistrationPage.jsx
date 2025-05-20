@@ -21,18 +21,8 @@ export default function GuestRegistrationPage() {
                 email: formData.email,
                 phone: formData.phone,
                 is_vip: formData.isVip,
-                has_car: formData.hasCar,
                 profileImage: formData.profileImage,
-                // Car details will be handled by the backend if has_car is true
-                plateNumber: formData.hasCar ? formData.plateNumber : undefined,
-                carModel: formData.hasCar ? formData.carModel : undefined,
-                carColor: formData.hasCar ? formData.carColor : undefined,
-                // Format items data
-                items: Array.isArray(formData.items) ? formData.items.map(item => ({
-                    name: typeof item === 'string' ? item : item.name,
-                    description: typeof item === 'string' ? '' : (item.description || ''),
-                    isChecked: typeof item === 'string' ? false : (item.isChecked || false)
-                })) : []
+                
             };
 
             console.log('Transformed guest data:', guestData); // Debug log
