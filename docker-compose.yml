@@ -12,7 +12,7 @@ services:
   backend:
     build: ./Backend
     ports:
-      - "5001:5000"
+      - "5000:5000"
     env_file:
       - ./Backend/.env
     depends_on:

@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  jenkins:
+    image: myjenkins-dood # The custom image we just built
+    container_name: jenkins-controller
+    restart: unless-stopped
+    ports:
+      - "8080:8080" # Jenkins web UI
+      - "50000:50000" # Jenkins agent port
+    volumes:
+      - jenkins_data:/var/jenkins_home # Persist Jenkins data (Docker managed volume)
+      - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket from host (Docker Desktop handles this path)
+
+      # Mount your GMS project directory from the HOST into the Jenkins WORKSPACE
+      # IMPORTANT: Use the Windows path format for the host side.
+      # Docker Compose on Windows will translate this to what the container needs.
+      # Example: If your GMS project is at C:\Users\YourUser\Projects\GMS
+      - "C:/Personal Projects/GMS:/var/jenkins_home/workspace/GMS"
+      # Or, if you prefer, you can often use WSL paths if Docker Desktop uses WSL2,
+      # but direct Windows paths are usually more straightforward in docker-compose.yml on Windows.
+      # Example WSL2 path if your C: drive is mounted at /mnt/c in WSL:
+      # - "/mnt/c/Users/YourUser/Projects/GMS:/var/jenkins_home/workspace/GMS"
+      #
+      # CHOOSE ONE of the above formats for the GMS project mount and REPLACE
+      # "C:/Users/YourUser/Projects/GMS" with your actual project path.
+      # Ensure your Jenkins job name is "GMS" or adjust the target path accordingly.
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock # Good practice
+
+volumes:
+  jenkins_data: # This creates a Docker named volume for Jenkins home
